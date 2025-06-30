@@ -20,13 +20,14 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
+import { useLoginAccount } from "@/hooks/useLogin";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const schema = z.object({
-    email: z.string().email(),
+    username: z.string(),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long")
@@ -37,8 +38,10 @@ export function LoginForm({
   });
   type form_schema = z.infer<typeof schema>;
   const form = useForm<form_schema>({ resolver: zodResolver(schema) });
+  const loginAccount = useLoginAccount();
   const onSubmit = (data: form_schema) => {
     console.log(data);
+    loginAccount.mutate(data);
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -54,16 +57,12 @@ export function LoginForm({
             <form className="grid gap-3" onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input
-                        className="rounded"
-                        placeholder="m@example.com"
-                        {...field}
-                      ></Input>
+                      <Input className="rounded" {...field}></Input>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

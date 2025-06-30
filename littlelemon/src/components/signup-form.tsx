@@ -20,13 +20,14 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
+import { useCreateAccount } from "@/hooks/useSignup";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const schema = z.object({
-    name: z
+    username: z
       .string()
       .min(2, { message: "Full name must be at least 2 characters long." })
       .max(50, { message: "Full name must be 50 characters or fewer." }),
@@ -40,9 +41,11 @@ export function SignupForm({
       ),
   });
   type form_schema = z.infer<typeof schema>;
+  const createAccount = useCreateAccount();
   const form = useForm<form_schema>({ resolver: zodResolver(schema) });
   const onSubmit = (data: form_schema) => {
     console.log(data);
+    createAccount.mutate(data);
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -58,10 +61,10 @@ export function SignupForm({
             <form className="grid gap-3" onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
                 control={form.control}
-                name="name"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input
                         className="rounded"

@@ -6,7 +6,10 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-
+import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+import { Textarea } from "../../components/ui/textarea";
+import { Input } from "../../components/ui/input";
+import { useCreateBooking, useListBookings } from "@/hooks/useBooking";
 import {
   Form,
   FormControl,
@@ -27,50 +30,69 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
-import { Textarea } from "../../components/ui/textarea";
-
-import { Input } from "../../components/ui/input";
 
 const Reservation: React.FC = () => {
-  const formSchema = z.object({
-    fullName: z
-      .string()
-      .min(2, { message: "Full name must be at least 2 characters long." })
-      .max(50, { message: "Full name must be 50 characters or fewer." }),
+  const schema = z.object({
+    name: z.string().min(1),
     email: z.string().email(),
-    phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
-      message: "Enter a valid phone number",
-    }),
-    guests: z.enum(
-      [
-        "1 Person",
-        "2 People",
-        "3 People",
-        "4 People",
-        "5 People",
-        "6 People",
-        "7 People",
-        "8 People",
-      ],
-      { message: "Please select how many guests will be attending." },
-    ),
-    date: z.date({
-      required_error: "Please select a reservation date.",
-      invalid_type_error: "Invalid date format. Please select a valid date.",
-    }),
-    seating: z.enum(["Indoor", "Outdoor", "None"], {
-      message: "Please choose a seating preference.",
-    }),
-    special: z.string().optional(),
+    phone_number: z.string().min(1),
+    comment: z.string(),
+    date: z.date(),
     time: z.string(),
+    number_of_guests: z.enum(["1", "2", "3", "4", "5", "6"]),
+    seating: z.enum(["Indoor", "Outdoor", "No Preference"]),
   });
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  type form_schema = z.infer<typeof schema>;
+  const form = useForm<form_schema>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      comment: "No Comment",
+      date: new Date(),
+      number_of_guests: "1",
+      seating: "No Preference",
+    },
   });
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const createBooking = useCreateBooking();
+  const onSubmit = (data: form_schema) => {
     console.log(data);
+    createBooking.mutate(data);
   };
+
+  const observe_date = form.watch("date");
+  const listBookings = useListBookings(observe_date || new Date());
+  const existingBookings = listBookings.data?.map((x, index) => {
+    return (
+      <div
+        key={index}
+        className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 p-4"
+      >
+        <div className="grid gap-1">
+          <div className="font-medium">{x.name}</div>
+          <div className="text-sm text-slate-600">
+            {x.number_of_guests} guests • {x.seating} seating
+          </div>
+          <div className="text-sm text-slate-500">Note: {x.comment}</div>
+        </div>
+        <div className="text-right">
+          <div className="font-medium">{x.time}</div>
+          <div className="text-sm text-slate-600">{x.email}</div>
+        </div>
+      </div>
+    );
+  });
+
+  const bookedSlots = listBookings.data?.map((x) => x.time);
+  const allSlots = ["19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"];
+  const availableSlots = allSlots.filter((time) => {
+    return !bookedSlots?.includes(time);
+  });
+  const timeSlots = availableSlots.map((x, index) => {
+    return (
+      <SelectItem key={index} value={x}>
+        {x}
+      </SelectItem>
+    );
+  });
   return (
     <main className="grid place-items-center gap-8">
       <div className="grid gap-3 px-6 py-12">
@@ -80,7 +102,7 @@ const Reservation: React.FC = () => {
           8, please call us directly at (555) 123-4567.
         </p>
       </div>
-      <div className="mb-24 grid w-9/12 gap-6 rounded-md border border-slate-200 p-8 lg:w-1/2">
+      <div className="mb-12 grid w-9/12 gap-6 rounded-md border border-slate-200 p-8 lg:w-1/2">
         <div className="grid place-items-center gap-2">
           <h2 className="text-center text-2xl font-semibold">
             Reservation Details
@@ -96,7 +118,7 @@ const Reservation: React.FC = () => {
           >
             <FormField
               control={form.control}
-              name="fullName"
+              name="name"
               render={({ field }) => (
                 <FormItem className="col-span-2">
                   <FormLabel>Full Name</FormLabel>
@@ -131,7 +153,7 @@ const Reservation: React.FC = () => {
 
             <FormField
               control={form.control}
-              name="phoneNumber"
+              name="phone_number"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
@@ -148,7 +170,7 @@ const Reservation: React.FC = () => {
             ></FormField>
             <FormField
               control={form.control}
-              name="guests"
+              name="number_of_guests"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Number of Guests</FormLabel>
@@ -162,14 +184,12 @@ const Reservation: React.FC = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="1 Person">1 Person</SelectItem>
-                      <SelectItem value="2 People">2 People</SelectItem>
-                      <SelectItem value="3 People">3 People</SelectItem>
-                      <SelectItem value="4 People">4 People</SelectItem>
-                      <SelectItem value="5 People">5 People</SelectItem>
-                      <SelectItem value="6 People">6 People</SelectItem>
-                      <SelectItem value="7 People">7 People</SelectItem>
-                      <SelectItem value="8 People">8 People</SelectItem>
+                      <SelectItem value="1">1 Person</SelectItem>
+                      <SelectItem value="2">2 People</SelectItem>
+                      <SelectItem value="3">3 People</SelectItem>
+                      <SelectItem value="4">4 People</SelectItem>
+                      <SelectItem value="5">5 People</SelectItem>
+                      <SelectItem value="6">6 People</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -206,7 +226,15 @@ const Reservation: React.FC = () => {
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          if (date) {
+                            // Fix timezone offset by setting to noon UTC
+                            const fixedDate = new Date(
+                              date.getTime() - date.getTimezoneOffset() * 60000,
+                            );
+                            field.onChange(fixedDate);
+                          }
+                        }}
                         disabled={(date) => date < new Date()}
                         initialFocus
                       />
@@ -231,11 +259,7 @@ const Reservation: React.FC = () => {
                         <SelectValue placeholder="Select a time" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="19:00">19:00</SelectItem>
-                      <SelectItem value="20:00">20:00</SelectItem>
-                      <SelectItem value="21:00">21:00</SelectItem>
-                    </SelectContent>
+                    <SelectContent>{timeSlots}</SelectContent>
                   </Select>
 
                   <FormMessage />
@@ -270,7 +294,7 @@ const Reservation: React.FC = () => {
                       </FormItem>
                       <FormItem className="flex items-center space-y-0 space-x-3">
                         <FormControl>
-                          <RadioGroupItem value="None" />
+                          <RadioGroupItem value="No Preference" />
                         </FormControl>
                         <FormLabel className="font-normal">
                           No Preference
@@ -284,7 +308,7 @@ const Reservation: React.FC = () => {
             />
             <FormField
               control={form.control}
-              name="special"
+              name="comment"
               render={({ field }) => (
                 <FormItem className="col-span-2">
                   <FormLabel>Comment</FormLabel>
@@ -305,6 +329,18 @@ const Reservation: React.FC = () => {
             </Button>
           </form>
         </Form>
+      </div>
+      <div className="mb-24 grid w-9/12 gap-6 rounded-md border border-slate-200 p-8 lg:w-1/2">
+        <div className="grid gap-2">
+          <h3 className="text-xl font-semibold">
+            Existing Reservations for{" "}
+            {observe_date.toISOString().split("T")[0]}{" "}
+          </h3>
+          <p className="text-sm text-slate-600">
+            View all bookings for the selected date
+          </p>
+        </div>
+        <div className="grid gap-3">{existingBookings}</div>
       </div>
     </main>
   );
