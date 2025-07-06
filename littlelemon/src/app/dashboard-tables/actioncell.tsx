@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal, CalendarIcon } from "lucide-react";
+import { MoreHorizontal, CalendarIcon, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,16 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   Form,
@@ -49,11 +59,16 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import type { request } from "@/apis/bookingapis";
-import { useListBookings, useUpdateBooking } from "@/hooks/useBooking";
+import {
+  useListBookings,
+  useUpdateBooking,
+  useDeleteBooking,
+} from "@/hooks/useBooking";
 
 const Actionscell = ({ item }: { item: request }) => {
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [isMobile, setMobile] = useState<boolean>(window.innerWidth < 600);
 
   const checksize = () => {
@@ -72,6 +87,14 @@ const Actionscell = ({ item }: { item: request }) => {
     // Small delay to ensure dropdown closes before opening drawer
     setTimeout(() => {
       setDrawerOpen(true);
+    }, 100);
+  };
+
+  const handleDeleteClick = () => {
+    setDropdownOpen(false); // Close dropdown first
+    // Small delay to ensure dropdown closes before opening dialog
+    setTimeout(() => {
+      setDeleteDialogOpen(true);
     }, 100);
   };
 
@@ -112,11 +135,28 @@ const Actionscell = ({ item }: { item: request }) => {
       seating: item.seating,
     },
   });
+
   const updateBooking = useUpdateBooking();
+  const deleteBooking = useDeleteBooking();
+
   const onSubmit = (data: request) => {
     console.log(data);
     updateBooking.mutate(data);
   };
+
+  const handleDeleteConfirm = () => {
+    deleteBooking.mutate(item.id, {
+      onSuccess: () => {
+        setDeleteDialogOpen(false);
+        console.log(`Booking for ${item.name} deleted successfully`);
+      },
+      onError: (error) => {
+        console.error("Error deleting booking:", error);
+        // You could add a toast notification here for error handling
+      },
+    });
+  };
+
   const observe_date = form.watch("date");
   const listBookings = useListBookings(observe_date || new Date());
   const bookedSlots = listBookings.data?.map((x) => x.time);
@@ -146,11 +186,44 @@ const Actionscell = ({ item }: { item: request }) => {
             Update
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600 focus:bg-red-100 focus:text-red-600">
+          <DropdownMenuItem
+            onClick={handleDeleteClick}
+            className="text-red-600 focus:bg-red-100 focus:text-red-600 dark:focus:bg-red-900/20"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this booking?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the booking for{" "}
+              <strong>{item.name}</strong> on{" "}
+              <strong>{new Date(item.date).toLocaleDateString()}</strong> at{" "}
+              <strong>{item.time}</strong>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBooking.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteBooking.isPending}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleteBooking.isPending ? "Deleting..." : "Delete Booking"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Drawer
         open={isDrawerOpen}
