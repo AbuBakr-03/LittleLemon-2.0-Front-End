@@ -4,9 +4,9 @@ import Menu from "./pages/menu/Menu";
 import Reservation from "./pages/reservation/Reservation";
 import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
-import Dashboard from "./pages/dashboard/Dashboard";
 import Wrapper from "./components/wrapper/Wrapper";
-import Booking from "./pages/dashboard/Booking";
+import Dashboard from "./pages/dashboard/Dashboard";
+import ReservationTable from "./app/dashboard-tables/ReservationTable";
 function App() {
   return (
     <>
@@ -19,7 +19,7 @@ function App() {
           <Route path="sign-up" element={<Signup />}></Route>
         </Route>
         <Route path="dashboard/" element={<Dashboard />}>
-          <Route path="booking" element={<Booking />}></Route>
+          <Route path="booking" element={<ReservationTable />}></Route>
         </Route>
       </Routes>
     </>

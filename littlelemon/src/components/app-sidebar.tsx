@@ -1,157 +1,169 @@
 import * as React from "react";
 import {
-  // IconCamera,
-  // IconChartBar,
-  IconDashboard,
-  // IconDatabase,
-  // IconFileAi,
-  // IconFileDescription,
-  // IconFileWord,
-  // IconFolder,
-  // IconHelp,
-  // IconInnerShadowTop,
-  // IconListDetails,
-  // IconReport,
-  // IconSearch,
-  // IconSettings,
-  // IconUsers,
-} from "@tabler/icons-react";
-import { CitrusIcon, NotebookTextIcon } from "lucide-react";
+  AudioWaveform,
+  // BookOpen,
+  // Bot,
+  Command,
+  // Frame,
+  GalleryVerticalEnd,
+  // Map,
+  // PieChart,
+  // Settings2,
+  SquareTerminal,
+  CitrusIcon,
+} from "lucide-react";
 
-// import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
-// import { NavSecondary } from "@/components/nav-secondary";
+// import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
+// This is sample data.
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+  teams: [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard/",
-      icon: IconDashboard,
-    },
-    {
-      title: "Bookings",
-      url: "booking/",
-      icon: NotebookTextIcon,
+      url: "/Dashboard",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Home",
+          url: "#",
+        },
+        {
+          title: "Reservations",
+          url: "#",
+        },
+        {
+          title: "Menu Items",
+          url: "#",
+        },
+        {
+          title: "Orders",
+          url: "#",
+        },
+      ],
     },
     // {
-    //   title: "Analytics",
+    //   title: "Models",
     //   url: "#",
-    //   icon: IconChartBar,
+    //   icon: Bot,
+    //   items: [
+    //     {
+    //       title: "Genesis",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Explorer",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Quantum",
+    //       url: "#",
+    //     },
+    //   ],
     // },
     // {
-    //   title: "Projects",
+    //   title: "Documentation",
     //   url: "#",
-    //   icon: IconFolder,
+    //   icon: BookOpen,
+    //   items: [
+    //     {
+    //       title: "Introduction",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Get Started",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Tutorials",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Changelog",
+    //       url: "#",
+    //     },
+    //   ],
     // },
     // {
-    //   title: "Team",
+    //   title: "Settings",
     //   url: "#",
-    //   icon: IconUsers,
+    //   icon: Settings2,
+    //   items: [
+    //     {
+    //       title: "General",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Team",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Billing",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Limits",
+    //       url: "#",
+    //     },
+    //   ],
     // },
   ],
-  // navClouds: [
+  // projects: [
   //   {
-  //     title: "Capture",
-  //     icon: IconCamera,
-  //     isActive: true,
+  //     name: "Design Engineering",
   //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
+  //     icon: Frame,
   //   },
   //   {
-  //     title: "Proposal",
-  //     icon: IconFileDescription,
+  //     name: "Sales & Marketing",
   //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
+  //     icon: PieChart,
   //   },
   //   {
-  //     title: "Prompts",
-  //     icon: IconFileAi,
+  //     name: "Travel",
   //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
+  //     icon: Map,
   //   },
   // ],
-  // navSecondary: [
-  //   {
-  //     title: "Settings",
-  //     url: "#",
-  //     icon: IconSettings,
-  //   },
-  //   {
-  //     title: "Get Help",
-  //     url: "#",
-  //     icon: IconHelp,
-  //   },
-  //   {
-  //     title: "Search",
-  //     url: "#",
-  //     icon: IconSearch,
-  //   },
-  // ],
-  // documents: [
-  //   {
-  //     name: "Data Library",
-  //     url: "#",
-  //     icon: IconDatabase,
-  //   },
-  //   {
-  //     name: "Reports",
-  //     url: "#",
-  //     icon: IconReport,
-  //   },
-  //   {
-  //     name: "Word Assistant",
-  //     url: "#",
-  //     icon: IconFileWord,
-  //   },
-  //],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -161,22 +173,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <CitrusIcon className="!size-5 text-yellow-600" />
-                <span className="text-base font-semibold">
-                  Little Lemon Inc.
-                </span>
+                <span className="text-base font-semibold">Acme Inc.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </SidebarMenu>{" "}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
