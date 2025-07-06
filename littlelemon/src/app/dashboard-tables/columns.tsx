@@ -4,7 +4,6 @@ import { type request } from "../../apis/bookingapis";
 
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { guests, seatings } from "./reservationData";
-import TableCellViewer from "@/components/data-table-drawer";
 import Actionscell from "./actioncell";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -15,9 +14,6 @@ export const columns: ColumnDef<request>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
-    cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />;
-    },
   },
   {
     accessorKey: "date",

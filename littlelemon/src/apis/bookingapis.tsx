@@ -1,6 +1,8 @@
 import axios from "axios";
 import z from "zod";
+
 const BASE_URL = "http://127.0.0.1:8000/api/booking/";
+
 const request_schema = z.object({
   id: z.number(),
   name: z.string().min(1),
@@ -12,76 +14,114 @@ const request_schema = z.object({
   number_of_guests: z.enum(["1", "2", "3", "4", "5", "6"]),
   seating: z.enum(["Indoor", "Outdoor", "No Preference"]),
 });
+
 const request_schema_array = z.array(request_schema);
+
 export type request = z.infer<typeof request_schema>;
 export type post = Omit<request, "id">;
+
+// Helper function to format date for Django
+const formatDateForDjango = (date: Date): string => {
+  return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
+};
+
+// Helper function to format data for backend
+const formatBookingData = (booking: post) => {
+  return {
+    ...booking,
+    date: formatDateForDjango(booking.date),
+    // Ensure comment is never empty string if Django expects it
+    comment: booking.comment || "No Comment",
+  };
+};
+
 export const listBookings = async (date?: Date): Promise<request[]> => {
   try {
-    const { data } = await axios.get(BASE_URL, {
-      params: date ? { date: date.toISOString().split("T")[0] } : {},
-    });
+    const params = date ? { date: formatDateForDjango(date) } : {};
+
+    const { data } = await axios.get(BASE_URL, { params });
+
     const result = request_schema_array.safeParse(data);
     if (result.success) {
       return result.data;
     } else {
-      console.error(result.error);
-      throw new Error();
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
     }
   } catch (error) {
-    console.error(error);
+    console.error("List bookings error:", error);
     throw error;
   }
 };
+
 export const createBooking = async (booking: post): Promise<request> => {
   try {
-    const { data } = await axios.post(BASE_URL, booking);
+    const formattedBooking = formatBookingData(booking);
+
+    console.log("Sending to backend:", formattedBooking);
+
+    const { data } = await axios.post(BASE_URL, formattedBooking);
+
     const result = request_schema.safeParse(data);
     if (result.success) {
       return result.data;
     } else {
-      console.error(result.error);
-      throw new Error();
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Create booking error:", error);
     throw error;
   }
 };
+
 export const retrieveBooking = async (id: number): Promise<request> => {
   try {
-    const { data } = await axios.get(`${BASE_URL}${id}`);
+    const { data } = await axios.get(`${BASE_URL}${id}/`);
+
     const result = request_schema.safeParse(data);
     if (result.success) {
       return result.data;
     } else {
-      console.error(result.error);
-      throw new Error();
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Retrieve booking error:", error);
     throw error;
   }
 };
+
 export const updateBooking = async (booking: request): Promise<request> => {
   try {
-    const { data } = await axios.put(`${BASE_URL}${booking.id}`, booking);
+    const formattedBooking = {
+      ...booking,
+      date: formatDateForDjango(booking.date),
+    };
+
+    const { data } = await axios.put(
+      `${BASE_URL}${booking.id}/`,
+      formattedBooking,
+    );
+
     const result = request_schema.safeParse(data);
     if (result.success) {
       return result.data;
     } else {
-      console.error(result.error);
-      throw new Error();
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Update booking error:", error);
     throw error;
   }
 };
+
 export const deleteBooking = async (id: number): Promise<void> => {
   try {
-    await axios.delete(`${BASE_URL}${id}`);
+    await axios.delete(`${BASE_URL}${id}/`);
   } catch (error) {
-    console.error(error);
+    console.error("Delete booking error:", error);
     throw error;
   }
 };

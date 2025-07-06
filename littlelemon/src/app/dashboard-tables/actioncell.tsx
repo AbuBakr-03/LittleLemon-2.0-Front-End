@@ -29,30 +29,43 @@ import {
 import type { request } from "@/apis/bookingapis";
 
 const Actionscell = ({ item }: { item: request }) => {
-  const [isOpen, setOpen] = useState<boolean>(false);
-  const [isMobile, setmobile] = useState<boolean>(window.innerWidth < 600);
+  const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [isMobile, setMobile] = useState<boolean>(window.innerWidth < 600);
 
   const checksize = () => {
-    if (window.innerWidth < 600) {
-      setmobile(true);
-    } else {
-      setmobile(false);
-    }
+    setMobile(window.innerWidth < 600);
   };
 
   useEffect(() => {
-    window.addEventListener("resize", () => {
-      checksize();
-    });
+    window.addEventListener("resize", checksize);
     return () => {
-      window.removeEventListener("resize", () => {
-        checksize();
-      });
+      window.removeEventListener("resize", checksize);
     };
   }, []);
+
+  const handleUpdateClick = () => {
+    setDropdownOpen(false); // Close dropdown first
+    // Small delay to ensure dropdown closes before opening drawer
+    setTimeout(() => {
+      setDrawerOpen(true);
+    }, 100);
+  };
+
+  const handleDrawerClose = (open: boolean) => {
+    setDrawerOpen(open);
+    // Ensure focus is properly restored when drawer closes
+    if (!open) {
+      // Force focus back to document body or a safe element
+      setTimeout(() => {
+        document.body.focus();
+      }, 100);
+    }
+  };
+
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
@@ -60,12 +73,8 @@ const Actionscell = ({ item }: { item: request }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Update{" "}
+          <DropdownMenuItem onClick={handleUpdateClick}>
+            Update
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-red-600 focus:bg-red-100 focus:text-red-600">
@@ -73,27 +82,28 @@ const Actionscell = ({ item }: { item: request }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <Drawer
-        open={isOpen}
-        onOpenChange={setOpen}
+        open={isDrawerOpen}
+        onOpenChange={handleDrawerClose}
         direction={isMobile ? "bottom" : "right"}
       >
         <DrawerContent>
           <DrawerHeader className="gap-1">
             <DrawerTitle>{item.name}</DrawerTitle>
-            <DrawerDescription>Edit Information </DrawerDescription>
+            <DrawerDescription>Edit Information</DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
             <form className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" defaultValue={item.name} />
+                <Label htmlFor="action-name">Name</Label>
+                <Input id="action-name" defaultValue={item.name} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="seating">Seating</Label>
+                  <Label htmlFor="action-seating">Seating</Label>
                   <Select defaultValue={item.seating}>
-                    <SelectTrigger id="seating" className="w-full">
+                    <SelectTrigger id="action-seating" className="w-full">
                       <SelectValue placeholder="Select a seating" />
                     </SelectTrigger>
                     <SelectContent>
@@ -106,9 +116,9 @@ const Actionscell = ({ item }: { item: request }) => {
                   </Select>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="number_of_guests">Guests</Label>
+                  <Label htmlFor="action-guests">Guests</Label>
                   <Select defaultValue={item.number_of_guests}>
-                    <SelectTrigger id="number_of_guests" className="w-full">
+                    <SelectTrigger id="action-guests" className="w-full">
                       <SelectValue placeholder="Select number of guests" />
                     </SelectTrigger>
                     <SelectContent>
@@ -124,28 +134,31 @@ const Actionscell = ({ item }: { item: request }) => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" defaultValue={item.email} />
+                  <Label htmlFor="action-email">Email</Label>
+                  <Input id="action-email" defaultValue={item.email} />
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="phone_number">Phone</Label>
-                  <Input id="phone_number" defaultValue={item.phone_number} />
+                  <Label htmlFor="action-phone">Phone</Label>
+                  <Input id="action-phone" defaultValue={item.phone_number} />
                 </div>
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="comment">Comments</Label>
-                <Input id="comment" defaultValue={item.comment} />
+                <Label htmlFor="action-comment">Comments</Label>
+                <Input id="action-comment" defaultValue={item.comment} />
               </div>
             </form>
           </div>
-          <DrawerFooter
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            <Button>Submit</Button>
+          <DrawerFooter>
+            <Button
+              onClick={() => {
+                // Handle form submission here
+                setDrawerOpen(false);
+              }}
+            >
+              Submit
+            </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Done</Button>
+              <Button variant="outline">Cancel</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
@@ -153,4 +166,5 @@ const Actionscell = ({ item }: { item: request }) => {
     </>
   );
 };
+
 export default Actionscell;

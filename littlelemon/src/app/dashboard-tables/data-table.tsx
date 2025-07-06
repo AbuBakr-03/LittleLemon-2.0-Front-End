@@ -1,42 +1,77 @@
 "use client";
 import * as React from "react";
+import { X, Plus, CalendarIcon } from "lucide-react";
+import { z } from "zod";
+import { cn } from "../../lib/utils";
+import { format } from "date-fns";
 
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  type SortingState,
-  getSortedRowModel,
-  type ColumnFiltersState,
-  getFilteredRowModel,
-  type VisibilityState,
-} from "@tanstack/react-table";
+import { seatings, guests } from "./reservationData";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import { DataTableViewOptions } from "@/components/data-table-visibility";
+import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
   Table,
+  TableRow,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
 } from "@/components/ui/table";
-// import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-// import {
-//   DropdownMenu,
-//   DropdownMenuCheckboxItem,
-//   DropdownMenuContent,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-import { DataTablePagination } from "@/components/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table-visibility";
-import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter";
-import { seatings, guests } from "./reservationData";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+
+import {
+  Form,
+  FormItem,
+  FormLabel,
+  FormField,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+} from "@/components/ui/select";
+
+import {
+  Dialog,
+  DialogTitle,
+  DialogClose,
+  DialogHeader,
+  DialogContent,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
+import {
+  flexRender,
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  type ColumnDef,
+  type SortingState,
+  type VisibilityState,
+  type ColumnFiltersState,
+} from "@tanstack/react-table";
+import { useCreateBooking, useListBookings } from "@/hooks/useBooking";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -52,7 +87,6 @@ export function DataTable<TData, TValue>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-
   const table = useReactTable({
     data,
     columns,
@@ -63,7 +97,6 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-
     state: {
       sorting,
       columnFilters,
@@ -71,10 +104,48 @@ export function DataTable<TData, TValue>({
     },
   });
   const isFiltered = table.getState().columnFilters.length > 0;
-
+  const schema = z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+    phone_number: z.string().min(1),
+    date: z.coerce.date(),
+    time: z.string(),
+    comment: z.string(),
+    number_of_guests: z.enum(["1", "2", "3", "4", "5", "6"]),
+    seating: z.enum(["Indoor", "Outdoor", "No Preference"]),
+  });
+  type post = z.infer<typeof schema>;
+  const form = useForm<post>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      comment: "No Comment",
+      date: new Date(),
+      number_of_guests: "1",
+      seating: "No Preference",
+    },
+  });
+  const createBooking = useCreateBooking();
+  const onSubmit = (data: post) => {
+    console.log(data);
+    createBooking.mutate(data);
+  };
+  const observe_date = form.watch("date");
+  const listBookings = useListBookings(observe_date || new Date());
+  const bookedSlots = listBookings.data?.map((x) => x.time);
+  const allSlots = ["19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"];
+  const availableSlots = allSlots.filter((time) => {
+    return !bookedSlots?.includes(time);
+  });
+  const timeSlots = availableSlots.map((x, index) => {
+    return (
+      <SelectItem key={index} value={x}>
+        {x}
+      </SelectItem>
+    );
+  });
   return (
     <div>
-      <div className="flex flex-1 items-center space-x-2 py-4">
+      <div className="flex flex-1 flex-wrap items-center space-y-2 space-x-2 py-4">
         <Input
           placeholder="Filter names..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -108,32 +179,248 @@ export function DataTable<TData, TValue>({
           </Button>
         )}
         <DataTableViewOptions table={table} />
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size={"sm"} className="h-8 place-self-start lg:flex">
+              <Plus className="h-4 w-4" />
+              New Booking
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
+          </DialogTrigger>
+          <DialogContent className="max-h-[95vh] max-w-2xl overflow-y-auto md:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Create New Booking</DialogTitle>
+              <DialogDescription>
+                Add a new reservation to your system.
+              </DialogDescription>
+            </DialogHeader>
+            {/* Your booking form here */}
+            <Form {...form}>
+              <form
+                className="grid grid-cols-2 gap-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="rounded"
+                          placeholder="John Doe"
+                          {...field}
+                        ></Input>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="rounded"
+                          placeholder="john@example.com"
+                          {...field}
+                        ></Input>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+
+                <FormField
+                  control={form.control}
+                  name="phone_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="rounded"
+                          placeholder="(555) 123-4567"
+                          {...field}
+                        ></Input>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="number_of_guests"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Guests</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl className="w-full rounded">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select number of guests" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1">1 Person</SelectItem>
+                          <SelectItem value="2">2 People</SelectItem>
+                          <SelectItem value="3">3 People</SelectItem>
+                          <SelectItem value="4">4 People</SelectItem>
+                          <SelectItem value="5">5 People</SelectItem>
+                          <SelectItem value="6">6 People</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl className="rounded">
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(date) => {
+                              if (date) {
+                                // Fix timezone offset by setting to noon UTC
+                                const fixedDate = new Date(
+                                  date.getTime() -
+                                    date.getTimezoneOffset() * 60000,
+                                );
+                                field.onChange(fixedDate);
+                              }
+                            }}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl className="w-full rounded">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a time" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>{timeSlots}</SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="seating"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2 space-y-3">
+                      <FormLabel>Seating Preference</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="grid grid-cols-2 place-content-center"
+                        >
+                          <FormItem className="flex items-center space-y-0 space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="Indoor" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Indoor
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-y-0 space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="Outdoor" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Outdoor (Weather Permitting)
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-y-0 space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="No Preference" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              No Preference
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Comment</FormLabel>
+                      <FormControl className="rounded">
+                        <Textarea
+                          placeholder=""
+                          className="resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogClose className="col-span-1" asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button className="col-span-1" type="submit">
+                  Submit
+                </Button>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
       </div>
       <div className="rounded-md border">
         <Table>
@@ -188,24 +475,6 @@ export function DataTable<TData, TValue>({
       <div className="space-x-2 py-4">
         <DataTablePagination table={table} />
       </div>
-      {/* <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div> */}
     </div>
   );
 }
