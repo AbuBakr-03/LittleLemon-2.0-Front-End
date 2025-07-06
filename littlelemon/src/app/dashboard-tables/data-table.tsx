@@ -72,6 +72,7 @@ import {
   type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useCreateBooking, useListBookings } from "@/hooks/useBooking";
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -87,6 +88,10 @@ export function DataTable<TData, TValue>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+
+  // State for dialog open/close
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
   const table = useReactTable({
     data,
     columns,
@@ -103,39 +108,87 @@ export function DataTable<TData, TValue>({
       columnVisibility,
     },
   });
+
   const isFiltered = table.getState().columnFilters.length > 0;
+
   const schema = z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    phone_number: z.string().min(1),
-    date: z.coerce.date(),
-    time: z.string(),
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Please enter a valid email"),
+    phone_number: z.string().min(1, "Phone number is required"),
+    date: z.date({
+      required_error: "Please select a date",
+    }),
+    time: z.string().min(1, "Please select a time"),
     comment: z.string(),
-    number_of_guests: z.enum(["1", "2", "3", "4", "5", "6"]),
-    seating: z.enum(["Indoor", "Outdoor", "No Preference"]),
+    number_of_guests: z.enum(["1", "2", "3", "4", "5", "6"], {
+      required_error: "Please select number of guests",
+    }),
+    seating: z.enum(["Indoor", "Outdoor", "No Preference"], {
+      required_error: "Please select seating preference",
+    }),
   });
+
   type post = z.infer<typeof schema>;
+
   const form = useForm<post>({
     resolver: zodResolver(schema),
     defaultValues: {
-      comment: "No Comment",
-      date: new Date(),
-      number_of_guests: "1",
-      seating: "No Preference",
+      name: "",
+      email: "",
+      phone_number: "",
+      comment: "",
+      date: undefined,
+      time: "",
+      number_of_guests: undefined,
+      seating: undefined,
     },
   });
+
   const createBooking = useCreateBooking();
-  const onSubmit = (data: post) => {
-    console.log(data);
-    createBooking.mutate(data);
+
+  const onSubmit = async (data: post) => {
+    try {
+      console.log("Submitting:", data);
+      await createBooking.mutateAsync({
+        ...data,
+        comment: data.comment || "No Comment",
+      });
+
+      // Reset form and close dialog on successful submission
+      form.reset();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Submission error:", error);
+      // Handle error - could show toast notification here
+    }
   };
+
+  // Reset form when dialog opens
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (open) {
+      // Reset form when opening dialog
+      form.reset({
+        name: "",
+        email: "",
+        phone_number: "",
+        comment: "",
+        date: undefined,
+        time: "",
+        number_of_guests: undefined,
+        seating: undefined,
+      });
+    }
+  };
+
   const observe_date = form.watch("date");
   const listBookings = useListBookings(observe_date || new Date());
-  const bookedSlots = listBookings.data?.map((x) => x.time);
+  const bookedSlots = listBookings.data?.map((x) => x.time) || [];
   const allSlots = ["19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"];
   const availableSlots = allSlots.filter((time) => {
-    return !bookedSlots?.includes(time);
+    return !bookedSlots.includes(time);
   });
+
   const timeSlots = availableSlots.map((x, index) => {
     return (
       <SelectItem key={index} value={x}>
@@ -143,6 +196,7 @@ export function DataTable<TData, TValue>({
       </SelectItem>
     );
   });
+
   return (
     <div>
       <div className="flex flex-1 flex-wrap items-center space-y-2 space-x-2 py-4">
@@ -179,7 +233,8 @@ export function DataTable<TData, TValue>({
           </Button>
         )}
         <DataTableViewOptions table={table} />
-        <Dialog>
+
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button size={"sm"} className="h-8 place-self-start lg:flex">
               <Plus className="h-4 w-4" />
@@ -193,7 +248,7 @@ export function DataTable<TData, TValue>({
                 Add a new reservation to your system.
               </DialogDescription>
             </DialogHeader>
-            {/* Your booking form here */}
+
             <Form {...form}>
               <form
                 className="grid grid-cols-2 gap-4"
@@ -210,12 +265,13 @@ export function DataTable<TData, TValue>({
                           className="rounded"
                           placeholder="John Doe"
                           {...field}
-                        ></Input>
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -227,12 +283,12 @@ export function DataTable<TData, TValue>({
                           className="rounded"
                           placeholder="john@example.com"
                           {...field}
-                        ></Input>
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
 
                 <FormField
                   control={form.control}
@@ -245,12 +301,13 @@ export function DataTable<TData, TValue>({
                           className="rounded"
                           placeholder="(555) 123-4567"
                           {...field}
-                        ></Input>
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
+
                 <FormField
                   control={form.control}
                   name="number_of_guests"
@@ -259,7 +316,7 @@ export function DataTable<TData, TValue>({
                       <FormLabel>Number of Guests</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value || ""}
                       >
                         <FormControl className="w-full rounded">
                           <SelectTrigger>
@@ -275,11 +332,11 @@ export function DataTable<TData, TValue>({
                           <SelectItem value="6">6 People</SelectItem>
                         </SelectContent>
                       </Select>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="date"
@@ -319,7 +376,6 @@ export function DataTable<TData, TValue>({
                             selected={field.value}
                             onSelect={(date) => {
                               if (date) {
-                                // Fix timezone offset by setting to noon UTC
                                 const fixedDate = new Date(
                                   date.getTime() -
                                     date.getTimezoneOffset() * 60000,
@@ -336,6 +392,7 @@ export function DataTable<TData, TValue>({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="time"
@@ -344,7 +401,7 @@ export function DataTable<TData, TValue>({
                       <FormLabel>Time</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value || ""}
                       >
                         <FormControl className="w-full rounded">
                           <SelectTrigger>
@@ -353,11 +410,11 @@ export function DataTable<TData, TValue>({
                         </FormControl>
                         <SelectContent>{timeSlots}</SelectContent>
                       </Select>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="seating"
@@ -367,7 +424,7 @@ export function DataTable<TData, TValue>({
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value || ""}
                           className="grid grid-cols-2 place-content-center"
                         >
                           <FormItem className="flex items-center space-y-0 space-x-3">
@@ -400,6 +457,7 @@ export function DataTable<TData, TValue>({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="comment"
@@ -408,53 +466,39 @@ export function DataTable<TData, TValue>({
                       <FormLabel>Comment</FormLabel>
                       <FormControl className="rounded">
                         <Textarea
-                          placeholder=""
+                          placeholder="Optional comments..."
                           className="resize-none"
                           {...field}
                         />
                       </FormControl>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <DialogClose className="col-span-1" asChild>
-                  <Button variant="outline">Cancel</Button>
+
+                <DialogClose asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="col-span-1"
+                  >
+                    Cancel
+                  </Button>
                 </DialogClose>
-                <Button className="col-span-1" type="submit">
-                  Submit
+
+                <Button
+                  className="col-span-1"
+                  type="submit"
+                  disabled={createBooking.isPending}
+                >
+                  {createBooking.isPending ? "Creating..." : "Create Booking"}
                 </Button>
               </form>
             </Form>
           </DialogContent>
         </Dialog>
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -505,6 +549,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="space-x-2 py-4">
         <DataTablePagination table={table} />
       </div>
