@@ -286,7 +286,7 @@ export function DataTable<TData, TValue>({
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Date</FormLabel>
-                      <Popover>
+                      <Popover modal={false}>
                         <PopoverTrigger asChild>
                           <FormControl className="rounded">
                             <Button
@@ -305,7 +305,15 @@ export function DataTable<TData, TValue>({
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent
+                          className="w-auto p-0"
+                          align="start"
+                          side="bottom"
+                          sideOffset={8}
+                          avoidCollisions={true}
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          onCloseAutoFocus={(e) => e.preventDefault()}
+                        >
                           <Calendar
                             mode="single"
                             selected={field.value}
@@ -420,7 +428,32 @@ export function DataTable<TData, TValue>({
             </Form>
           </DialogContent>
         </Dialog>
-
+        {/* <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu> */}
       </div>
       <div className="rounded-md border">
         <Table>

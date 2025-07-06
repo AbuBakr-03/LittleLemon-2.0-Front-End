@@ -1,6 +1,53 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Add these CSS rules to your index.css file */
 
+/* Ensure popover content appears above dialog */
+[data-radix-popper-content-wrapper] {
+  z-index: 1000 !important;
+}
+
+/* Fix for popover content in dialogs */
+[data-slot="dialog-content"] [data-slot="popover-content"] {
+  z-index: 1000 !important;
+  position: fixed !important;
+}
+
+/* Ensure calendar buttons are clickable */
+[data-slot="calendar"] button {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Prevent dialog from blocking calendar interactions */
+[data-slot="dialog-overlay"] {
+  pointer-events: none !important;
+}
+
+[data-slot="dialog-content"] {
+  pointer-events: auto !important;
+}
+
+/* Fix for calendar day buttons specifically */
+[data-slot="calendar"] [data-slot="button"] {
+  touch-action: manipulation !important;
+  user-select: none !important;
+}
+
+/* Ensure popover doesn't get clipped */
+[data-slot="popover-content"] {
+  overflow: visible !important;
+}
+
+/* Fix for react-day-picker buttons in dialog context */
+.rdp-button_reset {
+  pointer-events: auto !important;
+}
+
+.rdp-day {
+  pointer-events: auto !important;
+}
 /* * {
   margin: 0;
   padding: 0;
