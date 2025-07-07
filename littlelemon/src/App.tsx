@@ -8,6 +8,7 @@ import Wrapper from "./components/wrapper/Wrapper";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ReservationTable from "./app/reservation-tables/ReservationTable";
 import CategoryTable from "./app/category-tables/CategoryTable";
+import MenuTable from "./app/menu-tables/MenuTable";
 function App() {
   return (
     <>
@@ -22,6 +23,7 @@ function App() {
         <Route path="dashboard/" element={<Dashboard />}>
           <Route path="booking" element={<ReservationTable />}></Route>
           <Route path="category" element={<CategoryTable />}></Route>
+          <Route path="menu" element={<MenuTable />}></Route>
         </Route>
       </Routes>
     </>

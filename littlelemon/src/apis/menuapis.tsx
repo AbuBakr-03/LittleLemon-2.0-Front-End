@@ -9,19 +9,17 @@ const category_schema = z.object({
   category_name: z.string(),
 });
 
-// Schema for menu item
+// Schema for menu item response (matches Django serializer)
 const menu_schema = z.object({
-  id: z.number(),
   title: z.string().min(1),
-  logo: z.string().url(), // Image URL from Django
+  logo: z.string(), // Image URL from Django
   description: z.string(),
   price: z.string(), // Django DecimalField comes as string
   inventory: z.number().int().min(0),
   category: category_schema,
-  category_id: z.number(), // For write operations
 });
 
-// Schema for creating/updating menu (without id and category object)
+// Schema for creating menu (without id and category object)
 const menu_post_schema = z.object({
   title: z.string().min(1),
   logo: z.any(), // File upload - can be File object or string URL
@@ -31,10 +29,15 @@ const menu_post_schema = z.object({
   category_id: z.number(),
 });
 
-// Schema for updating existing menu (includes id)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const menu_update_schema = menu_post_schema.extend({
+// Schema for updating existing menu (includes id, but still uses category_id for updates)
+const menu_update_schema = z.object({
   id: z.number(),
+  title: z.string().min(1),
+  logo: z.any(), // File upload - can be File object or string URL
+  description: z.string(),
+  price: z.string(),
+  inventory: z.number().int().min(0),
+  category_id: z.number(),
 });
 
 const menu_array_schema = z.array(menu_schema);
@@ -77,10 +80,6 @@ export const createMenuItem = async (
     // Handle logo upload
     if (menuData.logo instanceof File) {
       formData.append("logo", menuData.logo);
-    } else if (typeof menuData.logo === "string") {
-      // If it's a URL string, you might want to handle this differently
-      // For now, we'll skip adding it to formData
-      console.warn("Logo is a string URL, not a file upload");
     }
 
     const { data } = await axios.post(BASE_URL, formData, {
