@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal, CalendarIcon, Trash2 } from "lucide-react";
+import { MoreHorizontal, CalendarIcon } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -190,7 +190,6 @@ const Actionscell = ({ item }: { item: request }) => {
             onClick={handleDeleteClick}
             className="text-red-600 focus:bg-red-100 focus:text-red-600 dark:focus:bg-red-900/20"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
