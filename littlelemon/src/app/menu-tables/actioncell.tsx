@@ -1,0 +1,390 @@
+import { useEffect, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from "@/components/ui/select";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import {
+  Form,
+  FormItem,
+  FormLabel,
+  FormField,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+import {
+  Drawer,
+  DrawerTitle,
+  DrawerClose,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerContent,
+  DrawerDescription,
+} from "@/components/ui/drawer";
+
+import { type menu_type } from "@/apis/menuapis";
+import { useUpdateMenuItem, useDeleteMenuItem } from "@/hooks/useMenu";
+import { useListCategories } from "@/hooks/useCategory";
+
+const Actionscell = ({ item }: { item: menu_type }) => {
+  const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [isMobile, setMobile] = useState<boolean>(window.innerWidth < 600);
+  const [imagePreview, setImagePreview] = useState<string>(item.logo);
+
+  const checksize = () => {
+    setMobile(window.innerWidth < 600);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", checksize);
+    return () => {
+      window.removeEventListener("resize", checksize);
+    };
+  }, []);
+
+  const handleUpdateClick = () => {
+    setDropdownOpen(false);
+    setTimeout(() => {
+      setDrawerOpen(true);
+    }, 100);
+  };
+
+  const handleDeleteClick = () => {
+    setDropdownOpen(false);
+    setTimeout(() => {
+      setDeleteDialogOpen(true);
+    }, 100);
+  };
+
+  const handleDrawerClose = (open: boolean) => {
+    setDrawerOpen(open);
+    if (!open) {
+      setTimeout(() => {
+        document.body.focus();
+      }, 100);
+    }
+  };
+
+  const schema = z.object({
+    id: z.number(),
+    title: z.string().min(1, "Title is required"),
+    logo: z.any(), // Can be File or string
+    description: z.string().min(1, "Description is required"),
+    price: z.string().min(1, "Price is required"),
+    inventory: z.number().min(0, "Inventory must be 0 or greater"),
+    category_id: z.number().min(1, "Category is required"),
+  });
+
+  type FormData = z.infer<typeof schema>;
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      id: item.id,
+      title: item.title,
+      logo: item.logo,
+      description: item.description,
+      price: item.price,
+      inventory: item.inventory,
+      category_id: item.category.id,
+    },
+  });
+
+  const updateMenuItem = useUpdateMenuItem();
+  const deleteMenuItem = useDeleteMenuItem();
+  const { data: categories } = useListCategories();
+
+  const onSubmit = (data: FormData) => {
+    console.log("Submitting menu update:", data);
+    updateMenuItem.mutate(data, {
+      onSuccess: () => {
+        setDrawerOpen(false);
+        console.log("Menu item updated successfully");
+      },
+      onError: (error) => {
+        console.error("Error updating menu item:", error);
+      },
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteMenuItem.mutate(item.id, {
+      onSuccess: () => {
+        setDeleteDialogOpen(false);
+        console.log(`Menu item "${item.title}" deleted successfully`);
+      },
+      onError: (error) => {
+        console.error("Error deleting menu item:", error);
+      },
+    });
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      form.setValue("logo", file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const categoryOptions = categories?.map((category) => (
+    <SelectItem key={category.id} value={category.id.toString()}>
+      {category.category_name}
+    </SelectItem>
+  ));
+
+  return (
+    <>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleUpdateClick}>
+            Update
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleDeleteClick}
+            className="text-red-600 focus:bg-red-100 focus:text-red-600 dark:focus:bg-red-900/20"
+          >
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this menu item?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{item.title}" from your menu. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMenuItem.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteMenuItem.isPending}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleteMenuItem.isPending ? "Deleting..." : "Delete Menu Item"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Update Drawer */}
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={handleDrawerClose}
+        direction={isMobile ? "bottom" : "right"}
+      >
+        <DrawerContent className={isMobile ? "min-h-[92.5vh]" : ""}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <DrawerHeader className="flex-shrink-0 gap-1">
+                <DrawerTitle>{item.title}</DrawerTitle>
+                <DrawerDescription>
+                  Edit Menu Item Information
+                </DrawerDescription>
+              </DrawerHeader>
+              <div
+                className={`flex flex-col gap-4 overflow-y-auto px-4 text-sm ${
+                  isMobile
+                    ? "max-h-[calc(90vh-200px)] min-h-0 flex-1 pb-4"
+                    : "flex-1 overflow-y-auto"
+                }`}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Image Preview and Upload */}
+                  <FormField
+                    control={form.control}
+                    name="logo"
+                    render={() => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Menu Item Image</FormLabel>
+                        <div className="grid gap-2">
+                          {imagePreview && (
+                            <img
+                              src={imagePreview}
+                              alt="Menu item preview"
+                              className="h-32 w-32 rounded-md object-cover"
+                            />
+                          )}
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="cursor-pointer"
+                          />
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="rounded"
+                            placeholder="Menu item title"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="rounded"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="inventory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inventory</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="rounded"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="category_id"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(Number(value))
+                          }
+                          value={field.value?.toString()}
+                        >
+                          <FormControl className="w-full rounded">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>{categoryOptions}</SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Description</FormLabel>
+                        <FormControl className="rounded">
+                          <Textarea
+                            placeholder="Menu item description"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <DrawerFooter className="flex-shrink-0 pt-4">
+                <Button type="submit" disabled={updateMenuItem.isPending}>
+                  {updateMenuItem.isPending ? "Updating..." : "Update"}
+                </Button>
+                <DrawerClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </form>
+          </Form>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+};
+
+export default Actionscell;

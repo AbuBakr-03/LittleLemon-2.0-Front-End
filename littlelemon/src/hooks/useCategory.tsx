@@ -28,7 +28,7 @@ export const useUpdateCategory = () => {
   return useMutation<category_type, Error, category_type>({
     mutationFn: (cat_data) => updateCategory(cat_data),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["catrgories"] }),
+      queryClient.invalidateQueries({ queryKey: ["categories"] }),
   });
 };
 export const useRetrieveCategory = (id: number) => {
