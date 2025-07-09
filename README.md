@@ -46,11 +46,11 @@ A modern, full-stack restaurant management system built with React, TypeScript, 
 
 Before running this project, make sure you have:
 
-- **Node.js** (v18 or higher)
-- **Python** (v3.8 or higher)
-- **MySQL** server
-- **npm** or **yarn**
-- **pip** (Python package manager)
+- **Node.js** 
+- **Python** 
+- **MySQL** 
+- **npm** 
+- **pip** 
 
 ## 🚀 Installation & Setup
 
@@ -121,33 +121,6 @@ npm install
 #### Start Development Server
 ```bash
 npm run dev
-```
-The frontend will be available at `http://localhost:5173/`
-
-## 📁 Project Structure
-
-```
-littlelemon/
-├── backend/
-│   ├── LittleLemon/           # Django project settings
-│   ├── LittleLemonApp/        # Main Django app
-│   │   ├── models.py          # Database models
-│   │   ├── serializers.py     # DRF serializers
-│   │   ├── views.py           # API views
-│   │   └── urls.py            # URL routing
-│   └── manage.py
-├── littlelemon/               # React frontend
-│   ├── src/
-│   │   ├── apis/              # API service functions
-│   │   ├── app/               # Feature-specific components
-│   │   ├── components/        # Reusable UI components
-│   │   ├── contexts/          # React contexts
-│   │   ├── hooks/             # Custom React hooks
-│   │   ├── pages/             # Page components
-│   │   └── lib/               # Utility functions
-│   ├── public/
-│   └── package.json
-└── README.md
 ```
 
 ## 🔧 Configuration
