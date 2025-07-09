@@ -59,6 +59,7 @@ export function LoginForm({
       onSuccess: (response) => {
         setAuth({
           access: response.access,
+          refresh: response.refresh,
           role: response.role,
           user: data.username,
           password: data.password,
@@ -69,6 +70,7 @@ export function LoginForm({
         form.reset();
         navigate(from, { replace: true }); //Current page will replaced in browser history by next page
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
         // Handle different error types
         if (error?.response) {

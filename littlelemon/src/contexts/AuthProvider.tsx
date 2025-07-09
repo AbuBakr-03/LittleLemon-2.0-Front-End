@@ -6,6 +6,7 @@ type childrenType = {
 
 type AuthState = {
   access: string | null;
+  refresh: string | null;
   password: string | null;
   user: string | null;
   role: string | null;
@@ -23,6 +24,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 const AuthProvider = ({ children }: childrenType) => {
   const [auth, setAuth] = useState<AuthState>({
     access: null,
+    refresh: null,
     password: null,
     user: null,
     role: null,
