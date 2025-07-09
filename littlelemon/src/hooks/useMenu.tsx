@@ -6,7 +6,6 @@ import {
   updateMenuItem,
   type menu_type,
   type menu_post_type,
-  type menu_update_type,
 } from "@/apis/menuapis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -37,7 +36,7 @@ export const useRetrieveMenuItem = (id: number) => {
 
 export const useUpdateMenuItem = () => {
   const queryClient = useQueryClient();
-  return useMutation<menu_type, Error, menu_update_type>({
+  return useMutation<menu_type, Error, menu_type>({
     mutationFn: (menuData) => updateMenuItem(menuData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menu-items"] });

@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -107,17 +109,26 @@ const Actionscell = ({ item }: { item: category_type }) => {
 
   const onSubmit = (data: request) => {
     console.log(data);
-    updateCategory.mutate(data);
+    updateCategory.mutate(data, {
+      onSuccess: () => {
+        toast.success(`Category ${data.category_name} updated successfully`);
+      },
+      onError: () => {
+        toast.error(`Error deleting category`);
+      },
+    });
   };
 
   const handleDeleteConfirm = () => {
     deleteCategory.mutate(item.id, {
       onSuccess: () => {
         setDeleteDialogOpen(false);
-        console.log(`Booking for ${item.category_name} deleted successfully`);
+        console.log(`Category ${item.category_name} deleted successfully`);
+        toast.success(`Category ${item.category_name} deleted successfully`);
       },
       onError: (error) => {
-        console.error("Error deleting booking:", error);
+        console.error("Error deleting category:", error);
+        toast.error(`Error deleting category`);
         // You could add a toast notification here for error handling
       },
     });

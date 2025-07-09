@@ -72,6 +72,7 @@ import {
   type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useCreateBooking, useListBookings } from "@/hooks/useBooking";
+import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -149,10 +150,20 @@ export function DataTable<TData, TValue>({
   const onSubmit = async (data: post) => {
     try {
       console.log("Submitting:", data);
-      await createBooking.mutateAsync({
-        ...data,
-        comment: data.comment || "No Comment",
-      });
+      await createBooking.mutateAsync(
+        {
+          ...data,
+          comment: data.comment || "No Comment",
+        },
+        {
+          onSuccess: () => {
+            toast.success(`Booking for ${data.name} created successfully`);
+          },
+          onError: () => {
+            toast.error("Error creating booking");
+          },
+        },
+      );
 
       // Reset form and close dialog on successful submission
       form.reset();

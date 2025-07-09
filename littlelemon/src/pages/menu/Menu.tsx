@@ -1,6 +1,3 @@
-import GreekSalad from "../../assets/GreekSalad.webp";
-import Calamari from "../../assets/Calamari.webp";
-import Bruschetta from "../../assets/Bruschetta.webp";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,124 +6,24 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { type menu_type } from "@/apis/menuapis";
+import { useListMenuItems } from "@/hooks/useMenu";
 const Menu: React.FC = () => {
-  type menu_type = {
-    name: string;
-    price: string;
-    description: string;
-    category: string;
-    image: string;
-  };
-  const data = [
-    {
-      name: "Greek Salad",
-      price: "12.99",
-      description:
-        "Fresh vegetables, olives, and our house-made feta cheese, dressed with olive oil.",
-      category: "starter",
-      image: GreekSalad,
-    },
-    {
-      name: "Bruschetta",
-      price: "9.99",
-      description:
-        "Grilled bread rubbed with garlic and topped with diced tomatoes, fresh basil, and olive oil.",
-      category: "starter",
-      image: Bruschetta,
-    },
-    {
-      name: "Calamari",
-      price: "14.99",
-      description:
-        "Lightly fried squid served with lemon aioli and marinara sauce.",
-      category: "starter",
-      image: Calamari,
-    },
-    {
-      name: "Greek Salad",
-      price: "12.99",
-      description:
-        "Fresh vegetables, olives, and our house-made feta cheese, dressed with olive oil.",
-      category: "main courses",
-      image: GreekSalad,
-    },
-    {
-      name: "Bruschetta",
-      price: "9.99",
-      description:
-        "Grilled bread rubbed with garlic and topped with diced tomatoes, fresh basil, and olive oil.",
-      category: "main courses",
-      image: Bruschetta,
-    },
-    {
-      name: "Calamari",
-      price: "14.99",
-      description:
-        "Lightly fried squid served with lemon aioli and marinara sauce.",
-      category: "main courses",
-      image: Calamari,
-    },
-    {
-      name: "Greek Salad",
-      price: "12.99",
-      description:
-        "Fresh vegetables, olives, and our house-made feta cheese, dressed with olive oil.",
-      category: "desserts",
-      image: GreekSalad,
-    },
-    {
-      name: "Bruschetta",
-      price: "9.99",
-      description:
-        "Grilled bread rubbed with garlic and topped with diced tomatoes, fresh basil, and olive oil.",
-      category: "desserts",
-      image: Bruschetta,
-    },
-    {
-      name: "Calamari",
-      price: "14.99",
-      description:
-        "Lightly fried squid served with lemon aioli and marinara sauce.",
-      category: "desserts",
-      image: Calamari,
-    },
-    {
-      name: "Greek Salad",
-      price: "12.99",
-      description:
-        "Fresh vegetables, olives, and our house-made feta cheese, dressed with olive oil.",
-      category: "drinks",
-      image: GreekSalad,
-    },
-    {
-      name: "Bruschetta",
-      price: "9.99",
-      description:
-        "Grilled bread rubbed with garlic and topped with diced tomatoes, fresh basil, and olive oil.",
-      category: "drinks",
-      image: Bruschetta,
-    },
-    {
-      name: "Calamari",
-      price: "14.99",
-      description:
-        "Lightly fried squid served with lemon aioli and marinara sauce.",
-      category: "drinks",
-      image: Calamari,
-    },
-  ];
-  const data_filter = (filter: string) => {
-    const filtered_data = data.filter((x) => {
-      return x.category == filter;
-    });
-    return filtered_data;
-  };
-  const starters_data = data_filter("starter");
-  const main_courses_data = data_filter("main courses");
-  const desserts_data = data_filter("desserts");
-  const drinks_data = data_filter("drinks");
+  const listMenuItems = useListMenuItems();
 
-  const data_map = (menu_list: menu_type[]) => {
+  const menu_filter = (filter: string) => {
+    const filtered_data = listMenuItems.data?.filter((x) => {
+      return x.category.category_name == filter;
+    });
+    return filtered_data || [];
+  };
+
+  const starters_data = menu_filter("Starters");
+  const main_courses_data = menu_filter("Main Courses");
+  const desserts_data = menu_filter("Desserts");
+  const drinks_data = menu_filter("Drinks");
+
+  const menu_map = (menu_list: menu_type[]) => {
     const mapped_data = menu_list.map((x, index) => {
       return (
         <Dialog>
@@ -134,7 +31,7 @@ const Menu: React.FC = () => {
             <DialogTrigger asChild>
               <div key={index} className="grid gap-2 rounded-lg border p-6">
                 <div className="grid grid-cols-2">
-                  <h3 className="font-bold">{x.name}</h3>
+                  <h3 className="font-bold">{x.title}</h3>
                   <p className="place-self-end font-medium text-yellow-500">
                     ${x.price}
                   </p>
@@ -149,12 +46,12 @@ const Menu: React.FC = () => {
               </DialogHeader> */}
               <div className="grid gap-2 p-2 lg:grid-cols-2 lg:place-items-center">
                 <img
-                  src={x.image}
+                  src={x.logo}
                   className="aspect-[4/3] overflow-hidden rounded-t-lg object-cover lg:aspect-square lg:w-[300px] lg:rounded-md"
-                  alt={x.name}
+                  alt={x.logo}
                 />
                 <div className="grid gap-3 p-4 lg:gap-8">
-                  <h4 className="text-2xl font-bold">{x.name}</h4>
+                  <h4 className="text-2xl font-bold">{x.title}</h4>
                   <p className="text-muted-foreground">{x.description}</p>
                   <p className="text-primary text-3xl font-bold">${x.price}</p>
                   <DialogFooter className="grid grid-cols-2 items-center">
@@ -176,10 +73,11 @@ const Menu: React.FC = () => {
     });
     return mapped_data;
   };
-  const starters = data_map(starters_data);
-  const main_courses = data_map(main_courses_data);
-  const desserts = data_map(desserts_data);
-  const drinks = data_map(drinks_data);
+
+  const starters = menu_map(starters_data);
+  const main_courses = menu_map(main_courses_data);
+  const desserts = menu_map(desserts_data);
+  const drinks = menu_map(drinks_data);
   return (
     <main className="grid place-items-center">
       <div className="grid place-items-center gap-3 px-6 py-12 lg:w-6/12">

@@ -9,6 +9,9 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import ReservationTable from "./app/reservation-tables/ReservationTable";
 import CategoryTable from "./app/category-tables/CategoryTable";
 import MenuTable from "./app/menu-tables/MenuTable";
+import { Toaster } from "sonner";
+import RequireAuth from "./components/RequireAuth";
+
 function App() {
   return (
     <>
@@ -20,12 +23,15 @@ function App() {
           <Route path="log-in" element={<Login />}></Route>
           <Route path="sign-up" element={<Signup />}></Route>
         </Route>
-        <Route path="dashboard/" element={<Dashboard />}>
-          <Route path="booking" element={<ReservationTable />}></Route>
-          <Route path="category" element={<CategoryTable />}></Route>
-          <Route path="menu" element={<MenuTable />}></Route>
+        <Route element={<RequireAuth allowedRole={"admin"} />}>
+          <Route path="dashboard/" element={<Dashboard />}>
+            <Route path="booking" element={<ReservationTable />}></Route>
+            <Route path="category" element={<CategoryTable />}></Route>
+            <Route path="menu" element={<MenuTable />}></Route>
+          </Route>
         </Route>
       </Routes>
+      <Toaster />
     </>
   );
 }

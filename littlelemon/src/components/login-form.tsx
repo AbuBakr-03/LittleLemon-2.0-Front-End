@@ -21,6 +21,9 @@ import {
   FormMessage,
 } from "../components/ui/form";
 import { useLoginAccount } from "@/hooks/useLogin";
+import { useAuth } from "@/contexts/AuthProvider";
+import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function LoginForm({
   className,
@@ -39,9 +42,46 @@ export function LoginForm({
   type form_schema = z.infer<typeof schema>;
   const form = useForm<form_schema>({ resolver: zodResolver(schema) });
   const loginAccount = useLoginAccount();
+  const authContext = useAuth(); // Get the context object
+
+  // Handle the case where context might be undefined
+  if (!authContext) {
+    throw new Error("LoginForm must be used within an AuthProvider");
+  }
+
+  const { setAuth } = authContext;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/"; //lets say they came from dashboard
   const onSubmit = (data: form_schema) => {
     console.log(data);
-    loginAccount.mutate(data);
+    loginAccount.mutate(data, {
+      onSuccess: (response) => {
+        setAuth({
+          access: response.access,
+          role: response.role,
+          user: data.username,
+          password: data.password,
+        });
+        toast("Welcome back 🎉", {
+          description: "You’re now logged in and ready to explore.",
+        });
+        form.reset();
+        navigate(from, { replace: true }); //Current page will replaced in browser history by next page
+      },
+      onError: (error: any) => {
+        // Handle different error types
+        if (error?.response) {
+          toast("No Server Response");
+        } else if (error?.response?.status === 400) {
+          toast("Missing Username or Password");
+        } else if (error?.response?.status === 401) {
+          toast("Unauthorized");
+        } else {
+          toast("Login failed");
+        }
+      },
+    });
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

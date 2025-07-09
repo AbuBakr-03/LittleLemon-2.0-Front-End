@@ -64,6 +64,7 @@ import {
   useUpdateBooking,
   useDeleteBooking,
 } from "@/hooks/useBooking";
+import { toast } from "sonner";
 
 const Actionscell = ({ item }: { item: request }) => {
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -141,7 +142,14 @@ const Actionscell = ({ item }: { item: request }) => {
 
   const onSubmit = (data: request) => {
     console.log(data);
-    updateBooking.mutate(data);
+    updateBooking.mutate(data, {
+      onSuccess: () => {
+        toast.success(`Booking for ${data.name} updated successfully`);
+      },
+      onError: () => {
+        toast.error("Error updating booking:");
+      },
+    });
   };
 
   const handleDeleteConfirm = () => {
@@ -149,9 +157,11 @@ const Actionscell = ({ item }: { item: request }) => {
       onSuccess: () => {
         setDeleteDialogOpen(false);
         console.log(`Booking for ${item.name} deleted successfully`);
+        toast.success(`Booking for ${item.name} deleted successfully`);
       },
       onError: (error) => {
         console.error("Error deleting booking:", error);
+        toast.error("Error deleting booking:");
         // You could add a toast notification here for error handling
       },
     });

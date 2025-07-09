@@ -16,6 +16,7 @@ const requestschema = z.object({
 const responseschema = z.object({
   access: z.string(),
   refresh: z.string(),
+  role: z.string(),
 });
 
 export type request = z.infer<typeof requestschema>;

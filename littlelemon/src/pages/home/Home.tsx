@@ -1,7 +1,12 @@
 import heroimg from "../../assets/Hero.avif";
 import { Link } from "react-router-dom";
 import { Clock, MapPin, Phone } from "lucide-react";
+import { useListMenuItems } from "@/hooks/useMenu";
 const Home: React.FC = () => {
+  const listMenuItems = useListMenuItems();
+  const images = listMenuItems.data?.map((x) => {
+    return x;
+  });
   return (
     <main className="grid place-items-center gap-8">
       <div className="grid place-items-center gap-8 bg-yellow-50">
@@ -49,58 +54,63 @@ const Home: React.FC = () => {
             <div className="overflow-hidden rounded-t-xl rounded-b-md border hover:shadow-lg md:rounded-t-md">
               <img
                 className="aspect-[21/9] max-h-[200px] w-full rounded-t-xl object-cover md:aspect-[9/8] md:rounded-t-md"
-                src={heroimg}
+                src={images?.[0]?.logo || heroimg}
                 alt="serving"
               />
               <div className="grid gap-2 px-4 py-6">
                 <div className="grid grid-cols-2 place-items-center">
-                  <p className="justify-self-start font-bold">Greek Salad</p>
+                  <p className="justify-self-start font-bold">
+                    {images?.[0]?.title || "Greek Salad"}
+                  </p>
                   <p className="justify-self-end font-semibold text-yellow-500">
-                    $12.99
+                    {images?.[0]?.price || "$12.99"}
                   </p>
                 </div>
                 <p className="text-slate-600">
-                  Fresh vegetables, olives, and our house-made feta cheese,
-                  dressed with olive oil.
+                  {images?.[0]?.description ||
+                    "Fresh vegetables, olives, and our house-made feta cheese dressed with olive oil."}
                 </p>
               </div>
             </div>
             <div className="overflow-hidden rounded-t-xl rounded-b-md border hover:shadow-lg md:rounded-t-md">
               <img
                 className="aspect-[21/9] max-h-[200px] w-full rounded-t-xl object-cover md:aspect-[9/8] md:rounded-t-md"
-                src={heroimg}
+                src={images?.[1]?.logo || heroimg}
                 alt="serving"
               />
               <div className="grid gap-2 px-4 py-6">
                 <div className="grid grid-cols-2 place-items-center">
-                  <p className="justify-self-start font-bold">Greek Salad</p>
+                  <p className="justify-self-start font-bold">
+                    {images?.[1]?.title || "Greek Salad"}
+                  </p>
                   <p className="justify-self-end font-semibold text-yellow-500">
-                    $12.99
+                    {images?.[1]?.price || "$12.99"}
                   </p>
                 </div>
                 <p className="text-slate-600">
-                  Fresh vegetables, olives, and our house-made feta cheese,
-                  dressed with olive oil.
+                  {images?.[1]?.description ||
+                    "Fresh vegetables, olives, and our house-made feta cheese dressed with olive oil."}
                 </p>
               </div>
             </div>
             <div className="overflow-hidden rounded-t-xl rounded-b-md border hover:shadow-lg md:rounded-t-md">
               <img
                 className="aspect-[21/9] max-h-[200px] w-full rounded-t-xl object-cover md:aspect-[9/8] md:rounded-t-md"
-                src={heroimg}
+                src={images?.[2]?.logo || heroimg}
                 alt="serving"
               />
               <div className="grid gap-2 px-4 py-6">
                 <div className="grid grid-cols-2 place-items-center">
-                  <p className="justify-self-start font-bold">Greek Salad</p>
+                  <p className="justify-self-start font-bold">
+                    {images?.[2]?.title || "Greek Salad"}
+                  </p>
                   <p className="justify-self-end font-semibold text-yellow-500">
-                    $12.99
+                    {images?.[2]?.price || "$12.99"}
                   </p>
                 </div>
                 <p className="text-slate-600">
-                  Fresh vegetables, olives, and our house-made feta cheese,
-                  dressed with olive oil. Fresh vegetables, olives, and our
-                  house-made feta cheese, dressed with olive oil.
+                  {images?.[2]?.description ||
+                    "Fresh vegetables, olives, and our house-made feta cheese dressed with olive oil."}
                 </p>
               </div>
             </div>
@@ -137,8 +147,7 @@ const Home: React.FC = () => {
             <div className="grid gap-2 rounded border-r-2 border-b-2 border-slate-200 bg-white px-6 py-4">
               <p className="text-yellow-500">★★★★★</p>
               <p className="text-slate-600">
-                "Authentic Mediterranean flavors that remind me of
-                home!""Authentic Mediterranean flavors that remind me of home!"
+                "Authentic Mediterranean flavors that remind me of home!"
               </p>
               <p className="font-semibold">- Maria</p>
             </div>
@@ -159,22 +168,16 @@ const Home: React.FC = () => {
               We believe in using the freshest ingredients, locally sourced
               whenever possible, and preparing everything with love and care.
             </p>
-            <Link
-              className="place-self-start rounded border px-3 py-2 text-sm font-semibold"
-              to={"/about"}
-            >
-              Learn More About Us
-            </Link>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <img
               className="aspect-[8/9] w-full rounded-md object-cover md:aspect-[2/4]"
-              src={heroimg}
+              src={images?.[9]?.logo || heroimg}
             />
             <img
               className="aspect-[8/9] w-full rounded-md object-cover md:aspect-[2/4]"
-              src={heroimg}
+              src={images?.[8]?.logo || heroimg}
             />
           </div>
         </div>

@@ -51,6 +51,7 @@ import {
   type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useCreateCategory } from "@/hooks/useCategory";
+import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -106,7 +107,14 @@ export function DataTable<TData, TValue>({
   const onSubmit = async (data: post) => {
     try {
       console.log("Submitting:", data);
-      await createCategory.mutateAsync(data);
+      await createCategory.mutateAsync(data, {
+        onSuccess: () => {
+          toast.success(`Category ${data.category_name} created successfully`);
+        },
+        onError: () => {
+          toast.error(`Error creating category`);
+        },
+      });
 
       // Reset form and close dialog on successful submission
       form.reset();

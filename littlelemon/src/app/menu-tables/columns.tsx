@@ -3,10 +3,15 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { type menu_type } from "../../apis/menuapis";
 
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
-import { categories } from "./menuData";
 import Actionscell from "./actioncell";
 
 export const columns: ColumnDef<menu_type>[] = [
+  {
+    accessorKey: "id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="ID" />
+    ),
+  },
   {
     accessorKey: "title",
     header: ({ column }) => (
@@ -20,7 +25,7 @@ export const columns: ColumnDef<menu_type>[] = [
     ),
     cell: ({ getValue }) => {
       const price = getValue() as string;
-      return `${price}`;
+      return `$${price}`;
     },
   },
   {
@@ -39,29 +44,7 @@ export const columns: ColumnDef<menu_type>[] = [
         id: number;
         category_name: string;
       };
-      const categoryData = categories.find(
-        (cat) => cat.value === category.id.toString(),
-      );
-
-      if (!categoryData) {
-        return null;
-      }
-
-      return (
-        <div className="flex items-center justify-center">
-          {categoryData.icon && (
-            <categoryData.icon className="text-muted-foreground mr-2 h-4 w-4" />
-          )}
-          <span>{categoryData.label}</span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      const category = row.getValue(id) as {
-        id: number;
-        category_name: string;
-      };
-      return value.includes(category.id.toString());
+      return <span>{category.category_name}</span>;
     },
   },
   {

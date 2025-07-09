@@ -30,6 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
+import { toast } from "sonner";
 
 const Reservation: React.FC = () => {
   const schema = z.object({
@@ -55,7 +56,14 @@ const Reservation: React.FC = () => {
   const createBooking = useCreateBooking();
   const onSubmit = (data: form_schema) => {
     console.log(data);
-    createBooking.mutate(data);
+    createBooking.mutate(data, {
+      onSuccess: () => {
+        toast.success(`Booking for ${data.name} created successfully`);
+      },
+      onError: () => {
+        toast.error("Error creating booking");
+      },
+    });
   };
 
   const observe_date = form.watch("date");

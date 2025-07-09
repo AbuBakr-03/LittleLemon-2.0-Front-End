@@ -55,13 +55,13 @@ import {
 import { type menu_type } from "@/apis/menuapis";
 import { useUpdateMenuItem, useDeleteMenuItem } from "@/hooks/useMenu";
 import { useListCategories } from "@/hooks/useCategory";
+import { toast } from "sonner";
 
 const Actionscell = ({ item }: { item: menu_type }) => {
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [isMobile, setMobile] = useState<boolean>(window.innerWidth < 600);
-  const [imagePreview, setImagePreview] = useState<string>(item.logo);
 
   const checksize = () => {
     setMobile(window.innerWidth < 600);
@@ -100,11 +100,14 @@ const Actionscell = ({ item }: { item: menu_type }) => {
   const schema = z.object({
     id: z.number(),
     title: z.string().min(1, "Title is required"),
-    logo: z.any(), // Can be File or string
     description: z.string().min(1, "Description is required"),
     price: z.string().min(1, "Price is required"),
     inventory: z.number().min(0, "Inventory must be 0 or greater"),
-    category_id: z.number().min(1, "Category is required"),
+    category: z.object({
+      id: z.number(),
+      category_name: z.string(),
+    }),
+    logo: z.string(),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -114,11 +117,11 @@ const Actionscell = ({ item }: { item: menu_type }) => {
     defaultValues: {
       id: item.id,
       title: item.title,
-      logo: item.logo,
       description: item.description,
       price: item.price,
       inventory: item.inventory,
-      category_id: item.category.id,
+      category: item.category,
+      logo: item.logo,
     },
   });
 
@@ -132,9 +135,11 @@ const Actionscell = ({ item }: { item: menu_type }) => {
       onSuccess: () => {
         setDrawerOpen(false);
         console.log("Menu item updated successfully");
+        toast.success("Menu item updated successfully");
       },
       onError: (error) => {
         console.error("Error updating menu item:", error);
+        toast.error("Error updating menu item");
       },
     });
   };
@@ -144,24 +149,13 @@ const Actionscell = ({ item }: { item: menu_type }) => {
       onSuccess: () => {
         setDeleteDialogOpen(false);
         console.log(`Menu item "${item.title}" deleted successfully`);
+        toast.success(`Menu item "${item.title}" deleted successfully`);
       },
       onError: (error) => {
         console.error("Error deleting menu item:", error);
+        toast.error(`Error deleting menu item`);
       },
     });
-  };
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      form.setValue("logo", file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const categoryOptions = categories?.map((category) => (
@@ -243,33 +237,6 @@ const Actionscell = ({ item }: { item: menu_type }) => {
                 }`}
               >
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Image Preview and Upload */}
-                  <FormField
-                    control={form.control}
-                    name="logo"
-                    render={() => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Menu Item Image</FormLabel>
-                        <div className="grid gap-2">
-                          {imagePreview && (
-                            <img
-                              src={imagePreview}
-                              alt="Menu item preview"
-                              className="h-32 w-32 rounded-md object-cover"
-                            />
-                          )}
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="cursor-pointer"
-                          />
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="title"
@@ -293,11 +260,11 @@ const Actionscell = ({ item }: { item: menu_type }) => {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price ($)</FormLabel>
+                        <FormLabel>Price</FormLabel>
                         <FormControl>
                           <Input
                             className="rounded"
-                            placeholder="0.00"
+                            placeholder="12.99"
                             {...field}
                           />
                         </FormControl>
@@ -316,7 +283,7 @@ const Actionscell = ({ item }: { item: menu_type }) => {
                           <Input
                             type="number"
                             className="rounded"
-                            placeholder="0"
+                            placeholder="50"
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -330,15 +297,23 @@ const Actionscell = ({ item }: { item: menu_type }) => {
 
                   <FormField
                     control={form.control}
-                    name="category_id"
+                    name="category"
                     render={({ field }) => (
                       <FormItem className="col-span-2">
                         <FormLabel>Category</FormLabel>
                         <Select
-                          onValueChange={(value) =>
-                            field.onChange(Number(value))
-                          }
-                          value={field.value?.toString()}
+                          onValueChange={(value) => {
+                            const selectedCategory = categories?.find(
+                              (cat) => cat.id.toString() === value,
+                            );
+                            if (selectedCategory) {
+                              field.onChange({
+                                id: selectedCategory.id,
+                                category_name: selectedCategory.category_name,
+                              });
+                            }
+                          }}
+                          value={field.value?.id?.toString()}
                         >
                           <FormControl className="w-full rounded">
                             <SelectTrigger>
