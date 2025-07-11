@@ -4,6 +4,7 @@ import {
   deleteBookingPrivate,
   listBookings,
   listBookingsPrivate,
+  retrieveBooking,
   retrieveBookingPrivate,
   updateBookingPrivate,
   type post,
@@ -28,6 +29,7 @@ export const useListBookingsPrivate = (date?: Date) => {
     queryKey: ["bookings-private", date?.toISOString().split("T")[0]],
     queryFn: () => listBookingsPrivate(axiosPrivate, date),
     enabled: !!axiosPrivate, // Only run query when axios instance is ready
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -65,6 +67,7 @@ export const useRetrieveBookingPrivate = (id: number) => {
     queryKey: ["booking-private", id],
     queryFn: () => retrieveBookingPrivate(axiosPrivate, id),
     enabled: !!id && !!axiosPrivate,
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -98,19 +101,17 @@ export const useDeleteBookingPrivate = () => {
 
 // Legacy hooks for backward compatibility (still used by public reservation form)
 export const useRetrieveBooking = (id: number) => {
-  const axiosPrivate = useAxiosPrivate(); // ✅ Hook called at top level
-  
   return useQuery({
     queryKey: ["Booking", id],
-    queryFn: () => retrieveBookingPrivate(axiosPrivate, id), // ✅ Use the variable
-    enabled: !!id && !!axiosPrivate, // ✅ Also check if axiosPrivate is ready
+    queryFn: () => retrieveBooking(id), // ✅ Use the variable
+    enabled: !!id, // ✅ Also check if axiosPrivate is ready
   });
 };
 
 export const useUpdateBooking = () => {
   const axiosPrivate = useAxiosPrivate(); // ✅ Hook called at top level
   const queryClient = useQueryClient();
-  
+
   return useMutation<request, Error, request>({
     mutationFn: (booking) => updateBookingPrivate(axiosPrivate, booking), // ✅ Use the variable
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookings"] }),
@@ -120,7 +121,7 @@ export const useUpdateBooking = () => {
 export const useDeleteBooking = () => {
   const axiosPrivate = useAxiosPrivate(); // ✅ Hook called at top level
   const queryClient = useQueryClient();
-  
+
   return useMutation<void, Error, number>({
     mutationFn: (id) => deleteBookingPrivate(axiosPrivate, id), // ✅ Use the variable
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookings"] }),

@@ -7,6 +7,7 @@ import {
   updateMenuItemPrivate,
   type menu_type,
   type menu_post_type,
+  retrieveMenuItem,
 } from "@/apis/menuapis";
 import { useAxiosPrivate } from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ export const useListMenuItemsPrivate = () => {
     queryKey: ["menu-items-private"],
     queryFn: () => listMenuItemsPrivate(axiosPrivate),
     enabled: !!axiosPrivate,
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -50,6 +52,7 @@ export const useRetrieveMenuItemPrivate = (id: number) => {
     queryKey: ["menu-item-private", id],
     queryFn: () => retrieveMenuItemPrivate(axiosPrivate, id),
     enabled: !!id && !!axiosPrivate,
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -94,12 +97,10 @@ export const useCreateMenuItem = () => {
 };
 
 export const useRetrieveMenuItem = (id: number) => {
-  const axiosPrivate = useAxiosPrivate();
-
   return useQuery<menu_type, Error>({
     queryKey: ["menu-item", id],
-    queryFn: () => retrieveMenuItemPrivate(axiosPrivate, id),
-    enabled: !!id && !!axiosPrivate,
+    queryFn: () => retrieveMenuItem(id),
+    enabled: !!id,
   });
 };
 

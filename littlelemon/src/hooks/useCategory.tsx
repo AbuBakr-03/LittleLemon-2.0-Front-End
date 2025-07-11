@@ -3,6 +3,7 @@ import {
   deleteCategoryPrivate,
   listCategories,
   listCategoriesPrivate,
+  retrieveCategory,
   retrieveCategoryPrivate,
   updateCategoryPrivate,
   type category_post_type,
@@ -27,6 +28,7 @@ export const useListCategoriesPrivate = () => {
     queryKey: ["categories-private"],
     queryFn: () => listCategoriesPrivate(axiosPrivate),
     enabled: !!axiosPrivate,
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -63,6 +65,7 @@ export const useRetrieveCategoryPrivate = (id: number) => {
     queryKey: ["category-private", id],
     queryFn: () => retrieveCategoryPrivate(axiosPrivate, id),
     enabled: !!id && !!axiosPrivate,
+    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -107,12 +110,11 @@ export const useUpdateCategory = () => {
 };
 
 export const useRetrieveCategory = (id: number) => {
-  const axiosPrivate = useAxiosPrivate();
 
   return useQuery({
     queryKey: ["category", id],
-    queryFn: () => retrieveCategoryPrivate(axiosPrivate, id),
-    enabled: !!id && !!axiosPrivate,
+    queryFn: () => retrieveCategory( id),
+    enabled: !!id,
   });
 };
 
