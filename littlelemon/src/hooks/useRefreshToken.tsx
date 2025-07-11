@@ -16,7 +16,12 @@ export const useRefreshToken = () => {
     );
     setAuth((prev) => {
       console.log(data.access);
-      return { ...prev, access: data.access, refresh: data.refresh };
+      return {
+        ...prev,
+        access: data.access,
+        refresh: data.refresh,
+        role: data.role,
+      };
     });
     return data.access;
   };
