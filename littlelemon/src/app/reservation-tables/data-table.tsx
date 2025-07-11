@@ -71,7 +71,10 @@ import {
   type VisibilityState,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
-import { useCreateBooking, useListBookings } from "@/hooks/useBooking";
+import {
+  useCreateBookingPrivate,
+  useListBookingsPrivate,
+} from "@/hooks/useBooking";
 import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
@@ -145,7 +148,7 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const createBooking = useCreateBooking();
+  const createBooking = useCreateBookingPrivate();
 
   const onSubmit = async (data: post) => {
     try {
@@ -178,7 +181,6 @@ export function DataTable<TData, TValue>({
   const handleDialogOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (open) {
-      // Reset form when opening dialog
       form.reset({
         name: "",
         email: "",
@@ -193,7 +195,7 @@ export function DataTable<TData, TValue>({
   };
 
   const observe_date = form.watch("date");
-  const listBookings = useListBookings(observe_date || new Date());
+  const listBookings = useListBookingsPrivate(observe_date || new Date());
   const bookedSlots = listBookings.data?.map((x) => x.time) || [];
   const allSlots = ["19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"];
   const availableSlots = allSlots.filter((time) => {

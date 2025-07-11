@@ -53,8 +53,11 @@ import {
 } from "@/components/ui/drawer";
 
 import { type menu_type } from "@/apis/menuapis";
-import { useUpdateMenuItem, useDeleteMenuItem } from "@/hooks/useMenu";
-import { useListCategories } from "@/hooks/useCategory";
+import {
+  useUpdateMenuItemPrivate,
+  useDeleteMenuItemPrivate,
+} from "@/hooks/useMenu";
+import { useListCategoriesPrivate } from "@/hooks/useCategory";
 import { toast } from "sonner";
 
 const Actionscell = ({ item }: { item: menu_type }) => {
@@ -125,9 +128,9 @@ const Actionscell = ({ item }: { item: menu_type }) => {
     },
   });
 
-  const updateMenuItem = useUpdateMenuItem();
-  const deleteMenuItem = useDeleteMenuItem();
-  const { data: categories } = useListCategories();
+  const updateMenuItem = useUpdateMenuItemPrivate();
+  const deleteMenuItem = useDeleteMenuItemPrivate();
+  const { data: categories } = useListCategoriesPrivate();
 
   const onSubmit = (data: FormData) => {
     console.log("Submitting menu update:", data);

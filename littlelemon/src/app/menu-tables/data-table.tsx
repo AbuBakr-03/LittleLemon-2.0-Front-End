@@ -59,10 +59,10 @@ import {
   type VisibilityState,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
-import { useCreateMenuItem } from "@/hooks/useMenu";
-import { useListCategories } from "@/hooks/useCategory";
+import { useCreateMenuItemPrivate } from "@/hooks/useMenu";
+import { useListCategoriesPrivate } from "@/hooks/useCategory";
 import { toast } from "sonner";
-import { useRefreshToken } from "../../hooks/useRefreshToken";
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -124,8 +124,8 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const createMenuItem = useCreateMenuItem();
-  const { data: categoriesData } = useListCategories();
+  const createMenuItem = useCreateMenuItemPrivate();
+  const { data: categoriesData } = useListCategoriesPrivate();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -172,7 +172,6 @@ export function DataTable<TData, TValue>({
     </SelectItem>
   ));
 
-  const refresh = useRefreshToken();
   return (
     <div>
       <div className="flex flex-1 flex-wrap items-center space-y-2 space-x-2 py-4">
@@ -186,10 +185,6 @@ export function DataTable<TData, TValue>({
         />
 
         <DataTableViewOptions table={table} />
-
-        <Button className="h-8" onClick={() => refresh()}>
-          Refresh
-        </Button>
 
         <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>

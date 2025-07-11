@@ -36,7 +36,10 @@ import {
 } from "@/components/ui/form";
 
 import { type category_type } from "@/apis/categoryapis";
-import { useUpdateCategory, useDeleteCategory } from "@/hooks/useCategory";
+import {
+  useUpdateCategoryPrivate,
+  useDeleteCategoryPrivate,
+} from "@/hooks/useCategory";
 import {
   Drawer,
   DrawerTitle,
@@ -104,8 +107,8 @@ const Actionscell = ({ item }: { item: category_type }) => {
     },
   });
 
-  const updateCategory = useUpdateCategory();
-  const deleteCategory = useDeleteCategory();
+  const updateCategory = useUpdateCategoryPrivate();
+  const deleteCategory = useDeleteCategoryPrivate();
 
   const onSubmit = (data: request) => {
     console.log(data);
@@ -114,7 +117,7 @@ const Actionscell = ({ item }: { item: category_type }) => {
         toast.success(`Category ${data.category_name} updated successfully`);
       },
       onError: () => {
-        toast.error(`Error deleting category`);
+        toast.error(`Error updating category`);
       },
     });
   };

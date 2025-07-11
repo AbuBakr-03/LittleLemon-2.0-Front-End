@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { z } from "zod";
 
@@ -28,7 +29,7 @@ export type menu_post_type = Omit<menu_type, "id" | "category"> & {
   logo: File; // For file upload
 };
 
-// List all menu items
+// Public functions (no auth required)
 export const listMenuItems = async (): Promise<menu_type[]> => {
   try {
     const { data } = await axios.get(BASE_URL);
@@ -45,7 +46,117 @@ export const listMenuItems = async (): Promise<menu_type[]> => {
   }
 };
 
-// Create new menu item
+// Private functions (require auth)
+export const listMenuItemsPrivate = async (
+  axiosPrivate: any,
+): Promise<menu_type[]> => {
+  try {
+    const { data } = await axiosPrivate.get("menu/");
+    const result = menu_array_schema.safeParse(data);
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
+    }
+  } catch (error) {
+    console.error("List menu items error:", error);
+    throw error;
+  }
+};
+
+export const createMenuItemPrivate = async (
+  axiosPrivate: any,
+  menuData: menu_post_type,
+): Promise<menu_type> => {
+  try {
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append("title", menuData.title);
+    formData.append("description", menuData.description);
+    formData.append("price", menuData.price);
+    formData.append("inventory", menuData.inventory.toString());
+    formData.append("category_id", menuData.category_id.toString());
+    formData.append("logo", menuData.logo);
+
+    const { data } = await axiosPrivate.post("menu/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    const result = menu_schema.safeParse(data);
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error("Validation error:", result.error);
+      console.error("Response data:", data);
+      throw new Error("Failed to validate response data");
+    }
+  } catch (error) {
+    console.error("Create menu item error:", error);
+    throw error;
+  }
+};
+
+export const retrieveMenuItemPrivate = async (
+  axiosPrivate: any,
+  id: number,
+): Promise<menu_type> => {
+  try {
+    const { data } = await axiosPrivate.get(`menu/${id}/`);
+    const result = menu_schema.safeParse(data);
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
+    }
+  } catch (error) {
+    console.error("Retrieve menu item error:", error);
+    throw error;
+  }
+};
+
+export const updateMenuItemPrivate = async (
+  axiosPrivate: any,
+  menuData: menu_type,
+): Promise<menu_type> => {
+  try {
+    const { data } = await axiosPrivate.patch(`menu/${menuData.id}/`, {
+      title: menuData.title,
+      description: menuData.description,
+      price: menuData.price,
+      inventory: menuData.inventory,
+      category_id: menuData.category.id,
+    });
+
+    const result = menu_schema.safeParse(data);
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error("Validation error:", result.error);
+      throw new Error("Failed to validate response data");
+    }
+  } catch (error) {
+    console.error("Update menu item error:", error);
+    throw error;
+  }
+};
+
+export const deleteMenuItemPrivate = async (
+  axiosPrivate: any,
+  id: number,
+): Promise<void> => {
+  try {
+    await axiosPrivate.delete(`menu/${id}/`);
+  } catch (error) {
+    console.error("Delete menu item error:", error);
+    throw error;
+  }
+};
+
+// Legacy functions for backward compatibility (keeping for public use)
 export const createMenuItem = async (
   menuData: menu_post_type,
 ): Promise<menu_type> => {
@@ -79,7 +190,6 @@ export const createMenuItem = async (
   }
 };
 
-// Retrieve single menu item
 export const retrieveMenuItem = async (id: number): Promise<menu_type> => {
   try {
     const { data } = await axios.get(`${BASE_URL}${id}/`);
@@ -96,7 +206,6 @@ export const retrieveMenuItem = async (id: number): Promise<menu_type> => {
   }
 };
 
-// Update menu item
 export const updateMenuItem = async (
   menuData: menu_type,
 ): Promise<menu_type> => {
@@ -122,7 +231,6 @@ export const updateMenuItem = async (
   }
 };
 
-// Delete menu item
 export const deleteMenuItem = async (id: number): Promise<void> => {
   try {
     await axios.delete(`${BASE_URL}${id}/`);

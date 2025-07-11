@@ -50,7 +50,7 @@ import {
   type VisibilityState,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
-import { useCreateCategory } from "@/hooks/useCategory";
+import { useCreateCategoryPrivate } from "@/hooks/useCategory";
 import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
@@ -102,7 +102,7 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const createCategory = useCreateCategory();
+  const createCategory = useCreateCategoryPrivate();
 
   const onSubmit = async (data: post) => {
     try {
