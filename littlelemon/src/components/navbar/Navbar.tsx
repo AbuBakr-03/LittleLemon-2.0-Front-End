@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
   const links = [
     { name: "Home", link: "/" },
     { name: "Menu", link: "/menu" },
-    { name: "Reservations", link: "/reservations" },
+    { name: "Reservation", link: "/reservation" },
   ];
 
   const linkslist2 = links.map((x) => {

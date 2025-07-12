@@ -27,8 +27,8 @@ const Footer: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link className="hover:text-black" to={"/reservations"}>
-              Reservations
+            <Link className="hover:text-black" to={"/reservation"}>
+              Reservation
             </Link>
           </li>
         </ul>

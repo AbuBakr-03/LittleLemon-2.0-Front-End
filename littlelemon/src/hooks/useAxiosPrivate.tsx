@@ -11,7 +11,6 @@ import { useAuth } from "@/contexts/AuthProvider";
 // 🔎 Why: We need to read the current access token so we can attach it to outgoing requests.
 
 import { useRefreshToken } from "./useRefreshToken";
-import { useLocation, useNavigate } from "react-router-dom";
 // ➡️ What: Custom hook that returns a function to refresh the access token.
 // 🔎 Why: Used when the access token has expired — to get a new one using the refresh token.
 
@@ -26,17 +25,16 @@ const axiosPrivate = axios.create({
     // ➡️ What: Declares the format of the request body as JSON.
     // 🔎 Why: Ensures that the backend API knows how to parse our request data.
   },
+  withCredentials: true,
 });
 
 // 🧠 Custom hook that returns the configured Axios instance with auth logic
 export const useAxiosPrivate = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const authContext = useAuth();
   // ➡️ What: Gets the current auth context.
   // 🔎 Why: Needed to access the current access token stored in context.
 
-  const { auth, setAuth } = authContext;
+  const { auth } = authContext;
   // ➡️ What: Extracts the auth object (contains access token).
   // 🔎 Why: We’ll use `auth.access` to attach to outgoing requests.
 
@@ -81,43 +79,25 @@ export const useAxiosPrivate = () => {
         // 🔎 Why: We want to retry this request after refreshing the token
 
         // ❗ Check if token expired (401) and the request hasn't already been retried
-        if (error?.response?.status === 401 && !prevRequest?.sent) {
+        if (error?.response?.status === 403 && !prevRequest?.sent) {
           prevRequest.sent = true;
           // ➡️ What: Marks the request as "sent" so we don't retry it again
           // 🔎 Why: Prevents infinite retry loops if the refresh also fails
 
-          try {
-            const newAccessToken = await refresh();
-            // 🔄 What: Try to get a new access token using the refresh token
-            // 🔎 Why: We need a valid token to retry the failed request
+          const newAccessToken = await refresh();
+          // 🔄 What: Try to get a new access token using the refresh token
+          // 🔎 Why: We need a valid token to retry the failed request
 
-            prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-            // ➡️ What: Update the Authorization header with the new token
-            // 🔎 Why: So the retried request has a valid token
+          prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          // ➡️ What: Update the Authorization header with the new token
+          // 🔎 Why: So the retried request has a valid token
 
-            return axiosPrivate(prevRequest);
-            // 🔁 What: Resend the original request
-            // 🔎 Why: Allows the operation to succeed without manual user input
-          } catch (refreshError) {
-            console.error("Token refresh failed:", refreshError);
-            // ❌ What: Log the refresh error
-            // 🔎 Why: Useful for debugging issues with refresh logic
+          return axiosPrivate(prevRequest);
+          // 🔁 What: Resend the original request
+          // 🔎 Why: Allows the operation to succeed without manual user input
 
-            // 🔑 When refresh fails, clear auth and redirect
-            console.error("Refresh token expired, redirecting to login");
-            setAuth({
-              access: null,
-              refresh: null,
-              user: null,
-              role: null,
-              password: null,
-            });
-            navigate("/log-in", { state: { from: location }, replace: true });
-
-            return Promise.reject(refreshError);
-            // ❌ What: Reject the request entirely
-            // 🔎 Why: If refresh fails, there's no point retrying — user should log in again
-          }
+          // ❌ What: Reject the request entirely
+          // 🔎 Why: If refresh fails, there's no point retrying — user should log in again
         }
 
         return Promise.reject(error);
@@ -136,7 +116,7 @@ export const useAxiosPrivate = () => {
       // ➡️ What: Removes the response interceptor
       // 🔎 Why: Same as above — important for cleaning up side effects
     };
-  }, [auth, refresh, navigate, location, setAuth]);
+  }, [auth, refresh]);
   // 📌 Dependencies for useEffect — re-run if `auth` or `refresh` function changes
   // 🔎 Why: Ensures interceptors always use the latest tokens/functions
 

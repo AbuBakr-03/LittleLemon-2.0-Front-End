@@ -26,7 +26,10 @@ const BASE_URL = "http://127.0.0.1:8000/auth/jwt/create/";
 
 export const login = async (details: request): Promise<response> => {
   try {
-    const { data } = await axios.post(BASE_URL, details);
+    const { data } = await axios.post(BASE_URL, details, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
     const result = responseschema.safeParse(data);
     if (result.success) {
       console.log(result.data);

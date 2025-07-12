@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,7 +22,10 @@ import {
 import { useLoginAccount } from "@/hooks/useLogin";
 import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Checkbox } from "./ui/checkbox";
+import { Label } from "./ui/label";
+import { useEffect } from "react";
 
 export function LoginForm({
   className,
@@ -49,7 +51,7 @@ export function LoginForm({
     throw new Error("LoginForm must be used within an AuthProvider");
   }
 
-  const { setAuth } = authContext;
+  const { setAuth, persist, setPersist } = authContext;
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/"; //lets say they came from dashboard
@@ -85,6 +87,14 @@ export function LoginForm({
       },
     });
   };
+  const togglePersist = (checked: boolean) => {
+    setPersist(checked);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("persist", JSON.stringify(persist));
+  }, [persist]);
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -124,6 +134,14 @@ export function LoginForm({
                 )}
               ></FormField>
               <div className="flex flex-col gap-6">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    onCheckedChange={togglePersist}
+                    checked={persist}
+                    id="terms"
+                  />
+                  <Label htmlFor="terms">Trust this device</Label>
+                </div>
                 <div className="flex flex-col">
                   <Button type="submit" className="w-full">
                     Login
@@ -132,9 +150,9 @@ export function LoginForm({
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <Link to={"/sign-up"} className="underline underline-offset-4">
                   Sign up
-                </a>
+                </Link>
               </div>
             </form>
           </Form>

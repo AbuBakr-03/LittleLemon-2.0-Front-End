@@ -4,7 +4,7 @@ import Menu from "./pages/menu/Menu";
 import Reservation from "./pages/reservation/Reservation";
 import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
-import Wrapper from "./components/wrapper/Wrapper";
+import Layout from "./components/Layout/Layout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ReservationTable from "./app/reservation-tables/ReservationTable";
 import CategoryTable from "./app/category-tables/CategoryTable";
@@ -17,10 +17,10 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Wrapper />}>
+        <Route path="/" element={<Layout />}>
           <Route index={true} element={<Home />}></Route>
           <Route path="menu" element={<Menu />}></Route>
-          <Route path="reservations" element={<Reservation />}></Route>
+          <Route path="reservation" element={<Reservation />}></Route>
           <Route path="log-in" element={<Login />}></Route>
           <Route path="sign-up" element={<Signup />}></Route>
         </Route>

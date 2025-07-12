@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 type childrenType = {
   children: React.ReactNode;
@@ -15,6 +15,8 @@ type AuthState = {
 type AuthContextType = {
   auth: AuthState;
   setAuth: React.Dispatch<React.SetStateAction<AuthState>>;
+  persist: boolean;
+  setPersist: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -29,8 +31,13 @@ const AuthProvider = ({ children }: childrenType) => {
     user: null,
     role: null,
   });
+  const [persist, setPersist] = useState<boolean>(() => {
+    const stored = localStorage.getItem("persist");
+    return stored ? JSON.parse(stored) : false;
+  });
+
   return (
-    <AuthContext.Provider value={{ auth, setAuth }}>
+    <AuthContext.Provider value={{ auth, setAuth, persist, setPersist }}>
       {children}
     </AuthContext.Provider>
   );

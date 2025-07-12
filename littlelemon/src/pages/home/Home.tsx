@@ -25,7 +25,7 @@ const Home: React.FC = () => {
             </p>
             <Link
               className="rounded-md border bg-black px-6 py-3 text-white"
-              to={"/reservations"}
+              to={"/reservation"}
             >
               Reserve a Table
             </Link>
