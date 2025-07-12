@@ -1,3 +1,4 @@
+// littlelemon/src/hooks/useBooking.tsx - Optimized Version
 import {
   createBooking,
   createBookingPrivate,
@@ -10,7 +11,7 @@ import {
   type post,
   type request,
 } from "@/apis/bookingapis";
-import { useAxiosPrivate } from "@/hooks/useAxiosPrivate";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Public hook for reservation form (no auth required)
@@ -21,15 +22,16 @@ export const useListBookings = (date?: Date) => {
   });
 };
 
-// Private hook for dashboard (requires auth)
+// Private hook for dashboard (requires auth) - OPTIMIZED
 export const useListBookingsPrivate = (date?: Date) => {
   const axiosPrivate = useAxiosPrivate();
 
   return useQuery<request[], Error>({
     queryKey: ["bookings-private", date?.toISOString().split("T")[0]],
-    queryFn: () => listBookingsPrivate(axiosPrivate, date),
-    enabled: !!axiosPrivate, // Only run query when axios instance is ready
-    retry: false, // 🔑 ADD THIS LINE
+    queryFn: () => {
+      return listBookingsPrivate(axiosPrivate, date);
+    },
+    enabled: !!axiosPrivate, // Only run when axios instance exists
   });
 };
 
@@ -67,7 +69,6 @@ export const useRetrieveBookingPrivate = (id: number) => {
     queryKey: ["booking-private", id],
     queryFn: () => retrieveBookingPrivate(axiosPrivate, id),
     enabled: !!id && !!axiosPrivate,
-    retry: false, // 🔑 ADD THIS LINE
   });
 };
 
@@ -103,27 +104,27 @@ export const useDeleteBookingPrivate = () => {
 export const useRetrieveBooking = (id: number) => {
   return useQuery({
     queryKey: ["Booking", id],
-    queryFn: () => retrieveBooking(id), // ✅ Use the variable
-    enabled: !!id, // ✅ Also check if axiosPrivate is ready
+    queryFn: () => retrieveBooking(id),
+    enabled: !!id,
   });
 };
 
 export const useUpdateBooking = () => {
-  const axiosPrivate = useAxiosPrivate(); // ✅ Hook called at top level
+  const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
 
   return useMutation<request, Error, request>({
-    mutationFn: (booking) => updateBookingPrivate(axiosPrivate, booking), // ✅ Use the variable
+    mutationFn: (booking) => updateBookingPrivate(axiosPrivate, booking),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookings"] }),
   });
 };
 
 export const useDeleteBooking = () => {
-  const axiosPrivate = useAxiosPrivate(); // ✅ Hook called at top level
+  const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, number>({
-    mutationFn: (id) => deleteBookingPrivate(axiosPrivate, id), // ✅ Use the variable
+    mutationFn: (id) => deleteBookingPrivate(axiosPrivate, id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookings"] }),
   });
 };

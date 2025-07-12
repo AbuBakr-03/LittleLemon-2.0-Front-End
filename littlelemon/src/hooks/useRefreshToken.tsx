@@ -1,8 +1,7 @@
-// littlelemon/src/hooks/useRefreshToken.tsx
 import { useAuth } from "@/contexts/AuthProvider";
 import axios from "axios";
 
-export const useRefreshToken = () => {
+const useRefreshToken = () => {
   const authContext = useAuth();
   const { setAuth } = authContext;
 
@@ -42,3 +41,5 @@ export const useRefreshToken = () => {
 
   return refresh;
 };
+
+export default useRefreshToken;

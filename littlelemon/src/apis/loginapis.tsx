@@ -1,7 +1,8 @@
-// littlelemon/src/apis/loginapis.tsx
+// littlelemon/src/apis/loginapis.tsx - Debug Version
 import axios from "axios";
 import { z } from "zod";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const requestschema = z.object({
   username: z.string(),
   password: z
@@ -13,7 +14,6 @@ const requestschema = z.object({
     ),
 });
 
-// Updated response schema - no refresh token in response body
 const responseschema = z.object({
   access: z.string(),
   role: z.string(),
@@ -33,14 +33,13 @@ export const login = async (details: request): Promise<response> => {
 
     const result = responseschema.safeParse(data);
     if (result.success) {
-      console.log(result.data);
       return result.data;
     } else {
-      console.error("Response validation error:", result.error);
+      console.error("Login: Response validation error:", result.error);
       throw new Error("Invalid response format");
     }
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login: Request failed", error);
     throw error;
   }
 };

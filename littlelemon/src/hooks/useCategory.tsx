@@ -9,7 +9,7 @@ import {
   type category_post_type,
   type category_type,
 } from "@/apis/categoryapis";
-import { useAxiosPrivate } from "@/hooks/useAxiosPrivate";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Public hook (no auth required)
@@ -110,10 +110,9 @@ export const useUpdateCategory = () => {
 };
 
 export const useRetrieveCategory = (id: number) => {
-
   return useQuery({
     queryKey: ["category", id],
-    queryFn: () => retrieveCategory( id),
+    queryFn: () => retrieveCategory(id),
     enabled: !!id,
   });
 };

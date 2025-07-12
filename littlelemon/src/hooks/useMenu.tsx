@@ -9,7 +9,7 @@ import {
   type menu_post_type,
   retrieveMenuItem,
 } from "@/apis/menuapis";
-import { useAxiosPrivate } from "@/hooks/useAxiosPrivate";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Public hook (no auth required)
