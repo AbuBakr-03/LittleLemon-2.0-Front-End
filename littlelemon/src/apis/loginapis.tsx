@@ -1,7 +1,7 @@
+// littlelemon/src/apis/loginapis.tsx
 import axios from "axios";
 import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const requestschema = z.object({
   username: z.string(),
   password: z
@@ -13,9 +13,9 @@ const requestschema = z.object({
     ),
 });
 
+// Updated response schema - no refresh token in response body
 const responseschema = z.object({
   access: z.string(),
-  refresh: z.string(),
   role: z.string(),
 });
 
@@ -28,18 +28,19 @@ export const login = async (details: request): Promise<response> => {
   try {
     const { data } = await axios.post(BASE_URL, details, {
       headers: { "Content-Type": "application/json" },
-      withCredentials: true,
+      withCredentials: true, // Important: ensures HttpOnly cookies are set
     });
+
     const result = responseschema.safeParse(data);
     if (result.success) {
       console.log(result.data);
       return result.data;
     } else {
-      console.error(result.error);
-      throw new Error();
+      console.error("Response validation error:", result.error);
+      throw new Error("Invalid response format");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     throw error;
   }
 };

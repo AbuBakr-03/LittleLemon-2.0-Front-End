@@ -1,3 +1,4 @@
+// littlelemon/src/components/login-form.tsx
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,9 +45,8 @@ export function LoginForm({
   type form_schema = z.infer<typeof schema>;
   const form = useForm<form_schema>({ resolver: zodResolver(schema) });
   const loginAccount = useLoginAccount();
-  const authContext = useAuth(); // Get the context object
+  const authContext = useAuth();
 
-  // Handle the case where context might be undefined
   if (!authContext) {
     throw new Error("LoginForm must be used within an AuthProvider");
   }
@@ -54,27 +54,27 @@ export function LoginForm({
   const { setAuth, persist, setPersist } = authContext;
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/"; //lets say they came from dashboard
+  const from = location.state?.from?.pathname || "/";
+
   const onSubmit = (data: form_schema) => {
     console.log(data);
     loginAccount.mutate(data, {
       onSuccess: (response) => {
         setAuth({
           access: response.access,
-          refresh: response.refresh,
+          refresh: null, // Don't store refresh token in state - it's in HttpOnly cookie
           role: response.role,
           user: data.username,
           password: data.password,
         });
         toast("Welcome back 🎉", {
-          description: "You’re now logged in and ready to explore.",
+          description: "You're now logged in and ready to explore.",
         });
         form.reset();
-        navigate(from, { replace: true }); //Current page will replaced in browser history by next page
+        navigate(from, { replace: true });
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
-        // Handle different error types
         if (error?.response) {
           toast("No Server Response");
         } else if (error?.response?.status === 400) {
@@ -87,6 +87,7 @@ export function LoginForm({
       },
     });
   };
+
   const togglePersist = (checked: boolean) => {
     setPersist(checked);
   };
@@ -127,7 +128,11 @@ export function LoginForm({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input className="rounded" {...field}></Input>
+                      <Input
+                        className="rounded"
+                        type="password"
+                        {...field}
+                      ></Input>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
