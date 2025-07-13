@@ -60,9 +60,9 @@ import {
 } from "@/components/ui/drawer";
 import type { request } from "@/apis/bookingapis";
 import {
-  useListBookings,
-  useUpdateBooking,
-  useDeleteBooking,
+  useListBookingsPrivate,
+  useUpdateBookingPrivate, // ✅ Changed from useUpdateBooking
+  useDeleteBookingPrivate, // ✅ Changed from useDeleteBooking
 } from "@/hooks/useBooking";
 import { toast } from "sonner";
 
@@ -137,14 +137,16 @@ const Actionscell = ({ item }: { item: request }) => {
     },
   });
 
-  const updateBooking = useUpdateBooking();
-  const deleteBooking = useDeleteBooking();
+  // ✅ Use the private versions of the hooks
+  const updateBooking = useUpdateBookingPrivate();
+  const deleteBooking = useDeleteBookingPrivate();
 
   const onSubmit = (data: request) => {
     console.log(data);
     updateBooking.mutate(data, {
       onSuccess: () => {
         toast.success(`Booking for ${data.name} updated successfully`);
+        setDrawerOpen(false); // ✅ Close drawer on success
       },
       onError: () => {
         toast.error("Error updating booking:");
@@ -168,7 +170,7 @@ const Actionscell = ({ item }: { item: request }) => {
   };
 
   const observe_date = form.watch("date");
-  const listBookings = useListBookings(observe_date || new Date());
+  const listBookings = useListBookingsPrivate(observe_date || new Date());
   const bookedSlots = listBookings.data?.map((x) => x.time);
   const allSlots = ["19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00"];
   const availableSlots = allSlots.filter((time) => {
@@ -481,8 +483,8 @@ const Actionscell = ({ item }: { item: request }) => {
                 </div>
               </div>
               <DrawerFooter className="flex-shrink-0 pt-4">
-                <Button type="submit" onClick={() => setDrawerOpen(false)}>
-                  Submit
+                <Button type="submit" disabled={updateBooking.isPending}>
+                  {updateBooking.isPending ? "Updating..." : "Submit"}
                 </Button>
                 <DrawerClose asChild>
                   <Button variant="outline">Cancel</Button>
