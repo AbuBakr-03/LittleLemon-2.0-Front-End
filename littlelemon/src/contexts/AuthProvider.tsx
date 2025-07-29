@@ -31,9 +31,21 @@ const AuthProvider = ({ children }: childrenType) => {
     user: null,
     role: null,
   });
+
   const [persist, setPersist] = useState<boolean>(() => {
-    const stored = localStorage.getItem("persist");
-    return stored ? JSON.parse(stored) : false;
+    try {
+      const stored = localStorage.getItem("persist");
+      // Check for null, empty string, or "undefined" string
+      if (!stored || stored === "undefined" || stored === "") {
+        return false;
+      }
+      return JSON.parse(stored);
+    } catch (error) {
+      console.warn("Failed to parse persist from localStorage:", error);
+      // Clean up the corrupted localStorage entry
+      localStorage.removeItem("persist");
+      return false;
+    }
   });
 
   return (
@@ -42,6 +54,7 @@ const AuthProvider = ({ children }: childrenType) => {
     </AuthContext.Provider>
   );
 };
+
 export default AuthProvider;
 
 export const useAuth = () => {

@@ -93,7 +93,10 @@ export function LoginForm({
   };
 
   useEffect(() => {
-    localStorage.setItem("persist", JSON.stringify(persist));
+    // Only store if persist is not undefined and is a valid boolean
+    if (typeof persist === "boolean") {
+      localStorage.setItem("persist", JSON.stringify(persist));
+    }
   }, [persist]);
 
   return (
