@@ -8,7 +8,7 @@ const useRefreshToken = () => {
   const refresh = async () => {
     try {
       const { data } = await axios.post(
-        "http://127.0.0.1:8000/auth/jwt/refresh/",
+        "https://api.littlelemon.restaurant/auth/jwt/refresh/",
         {}, // Empty body - refresh token comes from HttpOnly cookie
         {
           withCredentials: true, // Important: ensures cookies are sent

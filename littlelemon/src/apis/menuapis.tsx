@@ -2,7 +2,7 @@
 import axios from "axios";
 import { z } from "zod";
 
-const BASE_URL = "http://127.0.0.1:8000/api/menu/";
+const BASE_URL = "https://api.littlelemon.restaurant/api/menu/";
 
 // Schema for category (nested in menu response)
 const category_schema = z.object({

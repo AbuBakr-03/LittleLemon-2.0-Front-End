@@ -2,7 +2,7 @@
 import axios from "axios";
 import z from "zod";
 
-const BASE_URL = "http://127.0.0.1:8000/api/booking/";
+const BASE_URL = "https://api.littlelemon.restaurant/api/booking/";
 
 const request_schema = z.object({
   id: z.number(),

@@ -21,7 +21,7 @@ const useLogout = () => {
     try {
       // Call backend to clear HttpOnly cookie
       await axios.post(
-        "http://127.0.0.1:8000/auth/logout/",
+        "https://api.littlelemon.restaurant/auth/logout/",
         {},
         {
           withCredentials: true,
