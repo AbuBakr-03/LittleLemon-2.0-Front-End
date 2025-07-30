@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { Menu, X, CitrusIcon } from "lucide-react";
+import { Menu, X, CitrusIcon, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOnClickOutside } from "usehooks-ts";
 import { Link } from "react-router-dom";
-import styles from "./Navbar.module.css";
+// import styles from "./Navbar.module.css";
+import { Button } from "../ui/button";
 
 const Navbar: React.FC = () => {
   const [mobile, setmobile] = useState<boolean>(window.innerWidth < 900);
@@ -48,15 +49,15 @@ const Navbar: React.FC = () => {
     { name: "Reservation", link: "/reservation" },
   ];
 
-  const linkslist2 = links.map((x) => {
-    return (
-      <li
-        className={`border-b-2 border-transparent transition-all duration-300 hover:border-black hover:text-black`}
-      >
-        <Link to={x.link}>{x.name}</Link>
-      </li>
-    );
-  });
+  // const linkslist2 = links.map((x) => {
+  //   return (
+  //     <li
+  //       className={`border-b-2 border-transparent transition-all duration-300 hover:border-black hover:text-black`}
+  //     >
+  //       <Link to={x.link}>{x.name}</Link>
+  //     </li>
+  //   );
+  // });
 
   const linkslist = links.map((x) => {
     return (
@@ -151,7 +152,34 @@ const Navbar: React.FC = () => {
         </>
       ) : (
         <>
-          <nav
+          <nav className="grid w-full grid-cols-12 place-items-center py-1.5">
+            <Link
+              to={"/"}
+              className="col-span-3 text-lg font-bold text-slate-900"
+            >
+              <CitrusIcon className="text-yellow-500" />
+              SmartHR
+            </Link>
+            <ul className="col-span-6 grid grid-cols-3 place-items-center gap-4 text-sm font-medium text-slate-900">
+              <Link to={"/"}>
+                <Button variant={"ghost"}>Home</Button>
+              </Link>
+              <Link to={"menu"}>
+                <Button variant={"ghost"}>Menu</Button>
+              </Link>
+              <Link to={"reservation"}>
+                <Button variant={"ghost"}>Reservation</Button>
+              </Link>
+            </ul>
+            <div className="col-span-3 grid place-items-center gap-3">
+              <Link to={"dashboard"}>
+                <Button className="flex w-32 items-center bg-slate-900">
+                  <LayoutDashboard /> Dashboard
+                </Button>
+              </Link>
+            </div>
+          </nav>
+          {/* <nav
             className={`font-inter grid w-11/12 place-items-center text-sm font-semibold`}
           >
             <div
@@ -192,7 +220,7 @@ const Navbar: React.FC = () => {
                 </Link>
               </div>
             </div>
-          </nav>
+          </nav> */}
         </>
       )}
     </header>
