@@ -27,6 +27,7 @@ function App() {
         <Route element={<PersistLogin />}>
           <Route element={<RequireAuth allowedRole={"admin"} />}>
             <Route path="dashboard/" element={<Dashboard />}>
+              <Route index={true} element={<ReservationTable />}></Route>
               <Route path="booking" element={<ReservationTable />}></Route>
               <Route path="category" element={<CategoryTable />}></Route>
               <Route path="menu" element={<MenuTable />}></Route>

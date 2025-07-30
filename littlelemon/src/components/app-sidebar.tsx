@@ -19,7 +19,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/contexts/AuthProvider";
 import { Link } from "react-router-dom";
 
 const data = {
@@ -54,7 +53,7 @@ const data = {
       items: [
         {
           title: "Home",
-          url: "/dashboard",
+          url: "/",
         },
         {
           title: "Reservations",
@@ -74,8 +73,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const authContext = useAuth();
-  const { auth } = authContext;
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -99,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={auth.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

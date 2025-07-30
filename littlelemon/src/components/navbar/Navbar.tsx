@@ -125,23 +125,13 @@ const Navbar: React.FC = () => {
 
                   <div className="grid place-items-center gap-2">
                     <Link
-                      className={`w-11/12 rounded border border-slate-300 py-2 pr-2 pl-2 text-center text-sm font-semibold`}
-                      onClick={() => {
-                        handleClickOutside();
-                      }}
-                      to={"/sign-up"}
-                    >
-                      Sign Up
-                    </Link>
-
-                    <Link
                       className={`w-11/12 rounded bg-black py-2 pr-2 pl-2 text-center text-sm font-semibold text-white`}
                       onClick={() => {
                         handleClickOutside();
                       }}
-                      to={"/log-in"}
+                      to={"/dashboard"}
                     >
-                      Log In
+                      Dashboard
                     </Link>
                   </div>
                 </motion.div>
@@ -155,7 +145,7 @@ const Navbar: React.FC = () => {
           <nav className="grid w-full grid-cols-12 place-items-center py-1.5">
             <Link
               to={"/"}
-              className="col-span-3 text-lg font-bold text-slate-900"
+              className="col-span-3 flex text-lg font-bold text-slate-900"
             >
               <CitrusIcon className="text-yellow-500" />
               SmartHR
