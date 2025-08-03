@@ -110,7 +110,7 @@ const Reservation: React.FC = () => {
           8, please call us directly at (555) 123-4567.
         </p>
       </div>
-      <div className="mb-12 grid w-9/12 gap-6 rounded-md border border-slate-200 p-8 lg:w-1/2">
+      <div className="mb-12 grid w-11/12 gap-6 rounded-md border border-slate-200 p-8 lg:w-1/2">
         <div className="grid place-items-center gap-2">
           <h2 className="text-center text-2xl font-semibold">
             Reservation Details
@@ -163,7 +163,7 @@ const Reservation: React.FC = () => {
               control={form.control}
               name="phone_number"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-md:col-span-2">
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input
@@ -180,7 +180,7 @@ const Reservation: React.FC = () => {
               control={form.control}
               name="number_of_guests"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-md:col-span-2">
                   <FormLabel>Number of Guests</FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -209,7 +209,7 @@ const Reservation: React.FC = () => {
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className="flex flex-col max-md:col-span-2">
                   <FormLabel>Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -256,7 +256,7 @@ const Reservation: React.FC = () => {
               control={form.control}
               name="time"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-md:col-span-2">
                   <FormLabel>Time</FormLabel>
                   <Select
                     onValueChange={field.onChange}

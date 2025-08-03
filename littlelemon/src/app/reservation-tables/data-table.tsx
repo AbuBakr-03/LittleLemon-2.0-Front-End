@@ -307,7 +307,7 @@ export function DataTable<TData, TValue>({
                   control={form.control}
                   name="phone_number"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="max-md:col-span-2">
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
                         <Input
@@ -325,7 +325,7 @@ export function DataTable<TData, TValue>({
                   control={form.control}
                   name="number_of_guests"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="max-md:col-span-2">
                       <FormLabel>Number of Guests</FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -354,7 +354,7 @@ export function DataTable<TData, TValue>({
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className="flex flex-col max-md:col-span-2">
                       <FormLabel>Date</FormLabel>
                       <Popover modal={false}>
                         <PopoverTrigger asChild>
@@ -410,7 +410,7 @@ export function DataTable<TData, TValue>({
                   control={form.control}
                   name="time"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="max-md:col-span-2">
                       <FormLabel>Time</FormLabel>
                       <Select
                         onValueChange={field.onChange}
